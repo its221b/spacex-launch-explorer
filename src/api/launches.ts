@@ -10,42 +10,42 @@ export interface PaginatedLaunchesResponse {
 export const getLaunches = async (
   page: number = 1,
   limit: number = 10,
-  search?: string
+  search?: string,
 ): Promise<PaginatedLaunchesResponse> => {
   try {
     logInfo(`Fetching launches page ${page} with limit ${limit}`);
-    
+
     const params: any = {
       page,
       limit,
-      sort: { date_utc: 'desc' } // Most recent first
+      sort: { date_utc: 'desc' }, // Most recent first
     };
-    
+
     if (search && search.trim()) {
       params.query = {
         $or: [
           { name: { $regex: search.trim(), $options: 'i' } },
-          { details: { $regex: search.trim(), $options: 'i' } }
-        ]
+          { details: { $regex: search.trim(), $options: 'i' } },
+        ],
       };
     }
-    
+
     const res = await client.post('/v5/launches/query', {
       query: params.query || {},
       options: {
         page,
         limit,
         sort: params.sort,
-        populate: ['launchpad']
-      }
+        populate: ['launchpad'],
+      },
     });
-    
+
     const data = res.data;
     const result: PaginatedLaunchesResponse = {
       docs: data.docs || [],
-      hasNextPage: data.hasNextPage || false
+      hasNextPage: data.hasNextPage || false,
     };
-    
+
     logInfo(`Successfully fetched ${result.docs.length} launches (page ${page})`);
     return result;
   } catch (error) {

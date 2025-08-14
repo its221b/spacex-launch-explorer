@@ -13,20 +13,20 @@ export default function useLocation() {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Check current permission status
       const { status: existingStatus } = await Location.getForegroundPermissionsAsync();
-      
+
       if (existingStatus === 'granted') {
         // Permission already granted, get location
         await getCurrentLocation();
         return;
       }
-      
+
       if (existingStatus === 'denied') {
         // Permission denied, request it
         const { status } = await Location.requestForegroundPermissionsAsync();
-        
+
         if (status === 'granted') {
           await getCurrentLocation();
         } else {
@@ -34,11 +34,11 @@ export default function useLocation() {
           setError('Location permission denied');
         }
       }
-      
+
       if (existingStatus === 'undetermined') {
         // Permission not determined yet, request it
         const { status } = await Location.requestForegroundPermissionsAsync();
-        
+
         if (status === 'granted') {
           await getCurrentLocation();
         } else {
@@ -63,10 +63,10 @@ export default function useLocation() {
         timeInterval: 10000,
         distanceInterval: 10,
       });
-      
-      setCoords({ 
-        latitude: location.coords.latitude, 
-        longitude: location.coords.longitude 
+
+      setCoords({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
       });
       setDenied(false);
       setError(null);
@@ -89,12 +89,12 @@ export default function useLocation() {
     }
   };
 
-  return { 
-    coords, 
-    denied, 
-    loading, 
-    error, 
+  return {
+    coords,
+    denied,
+    loading,
+    error,
     refreshLocation,
-    requestLocationPermission 
+    requestLocationPermission,
   };
 }

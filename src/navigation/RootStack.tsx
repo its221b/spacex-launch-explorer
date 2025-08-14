@@ -9,11 +9,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function RootStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen
-        name="Main"
-        component={BottomTabs}
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="Main" component={BottomTabs} options={{ headerShown: false }} />
       <Stack.Screen
         name="LaunchDetail"
         component={LaunchDetailScreen}

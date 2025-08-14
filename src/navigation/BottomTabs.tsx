@@ -74,16 +74,16 @@ export default function BottomTabs() {
         },
       }}
     >
-      <Tab.Screen 
-        name="Launches" 
+      <Tab.Screen
+        name="Launches"
         component={LaunchListScreen}
         options={{
           title: 'Launches',
           tabBarLabel: 'Launches',
         }}
       />
-      <Tab.Screen 
-        name="Map" 
+      <Tab.Screen
+        name="Map"
         component={MapScreen}
         options={{
           title: 'Map',

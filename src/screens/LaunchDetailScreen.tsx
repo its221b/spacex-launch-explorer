@@ -9,7 +9,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { Launch, Launchpad } from '../api/types';
@@ -29,7 +29,6 @@ import { useLaunchStore } from '../store/launcheStore';
 type Props = NativeStackScreenProps<RootStackParamList, 'LaunchDetail'>;
 
 export default function LaunchDetailScreen({ route, navigation }: Props) {
-  const insets = useSafeAreaInsets();
   const { id } = route.params;
   const [launch, setLaunch] = useState<Launch | null>(null);
   const [launchpad, setLaunchpad] = useState<Launchpad | null>(null);
@@ -91,7 +90,7 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.background }}>
-      <ScrollView 
+      <ScrollView
         style={styles.container}
         contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}

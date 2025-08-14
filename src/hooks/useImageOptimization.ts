@@ -27,12 +27,12 @@ export const useImageOptimization = ({
   const getOptimizedUrl = useCallback((url: string): string => {
     // If it's already a small image, return as is
     if (url.includes('small')) return url;
-    
+
     // For SpaceX API images, prefer smaller versions for list items
     if (url.includes('large')) {
       return url.replace('/large/', '/small/');
     }
-    
+
     // For other images, try to get a smaller version if possible
     // This is a generic approach that might work for some CDNs
     if (url.includes('?') || url.includes('&')) {
@@ -62,7 +62,7 @@ export const useImageOptimization = ({
       setIsLoading(true);
       setHasError(false);
       setIsLoaded(false);
-      
+
       // Preload the optimized image
       preloadImage(optimized).then((success) => {
         setIsLoading(false);
@@ -88,7 +88,7 @@ export const useImageOptimization = ({
       setHasError(false);
       setIsLoading(true);
       setIsLoaded(false);
-      
+
       preloadImage(imageUrl).then((success) => {
         setIsLoading(false);
         if (success) {

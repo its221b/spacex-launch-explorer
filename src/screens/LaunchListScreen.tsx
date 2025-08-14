@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  View,
+  AppState,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import EmptyState from '../components/EmptyState';
 import ErrorState from '../components/ErrorState';
@@ -32,16 +39,37 @@ export default function LaunchListScreen() {
   const [localSearchQuery, setLocalSearchQuery] = useState('');
 
   useEffect(() => {
-    initLaunches();
+    // Wait for app to be fully ready before making API calls
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState === 'active') {
+        // App is now active, wait a bit more for network stack to be ready
+        setTimeout(() => {
+          initLaunches();
+        }, 500);
+      }
+    };
+
+    // Listen for app state changes
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    // Initial call with delay
+    const timer = setTimeout(() => {
+      initLaunches();
+    }, 1500); // 1.5 second delay
+
+    return () => {
+      clearTimeout(timer);
+      subscription?.remove();
+    };
   }, [initLaunches]);
 
   // Preload images when launches change
   useEffect(() => {
     if (launches.length > 0) {
       const imageUrls = launches
-        .map(launch => launch.links?.patch?.small || launch.links?.patch?.large)
+        .map((launch) => launch.links?.patch?.small || launch.links?.patch?.large)
         .filter(Boolean) as string[];
-      
+
       if (imageUrls.length > 0) {
         // Queue images for background preloading
         imagePreloader.queueForPreload(imageUrls);

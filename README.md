@@ -1,275 +1,288 @@
 # 🚀 SpaceX Launch Explorer
 
-A polished SpaceX Launch Explorer mobile app built with React Native, Expo, and TypeScript. This app consumes the SpaceX public API and implements a maps-first native experience for space enthusiasts.
+A modern, feature-rich mobile application built with React Native and Expo that allows users to explore SpaceX launches, view launchpad locations on interactive maps, and get real-time information about space missions.
 
-## ✨ Features
+## 📱 What is SpaceX Launch Explorer?
 
-- **Launch List**: Browse all SpaceX launches with infinite scroll and search
-- **Launch Details**: View comprehensive launch information including mission patches, details, and launchpad data
-- **Interactive Maps**: See launchpad locations with distance calculations from your current position
-- **Real-time Data**: Live data from SpaceX API with automatic retry mechanisms
-- **Modern UI/UX**: Clean, consistent design system with professional styling
-- **Error Handling**: Comprehensive error boundaries and user-friendly error messages
-- **Offline Support**: Graceful handling of network issues with retry functionality
+SpaceX Launch Explorer is a comprehensive mobile app that provides space enthusiasts with:
 
-## 🗺️ Map Implementation and Libraries Used
+- **Real-time SpaceX launch data** from the official SpaceX API
+- **Interactive maps** showing launchpad locations worldwide
+- **Detailed launch information** including mission patches, dates, and status
+- **Location-based features** to see your distance from launch sites
+- **Professional UI/UX** with modern design patterns and smooth animations
 
-### **Core Mapping Libraries**
-- **React Native Maps**: Primary mapping component with Google Maps provider
-- **Expo Location**: Device location services and permission handling
-- **Google Maps API**: Native map rendering and geocoding services
+## ✨ Key Features
 
-### **Map Features Implemented**
-- **Launchpad Markers**: Red pins showing SpaceX launch site locations
-- **User Location**: Blue pin displaying current device position
-- **Distance Calculations**: Real-time distance from user to launchpad using Haversine formula
-- **Interactive Navigation**: Tap markers for launchpad information
-- **Map Controls**: Built-in zoom, pan, and compass functionality
+### 🚀 Launch Management
+- **Browse all SpaceX launches** with infinite scroll pagination
+- **Search and filter** launches by name or mission details
+- **Launch details** with comprehensive mission information
+- **Mission patches** and high-quality images
+- **Launch status tracking** (upcoming, successful, failed)
 
-### **Technical Implementation**
-The MapViewComponent uses Google Maps provider with comprehensive configuration including user location display, compass, scale, buildings, and indoor mapping. The component automatically fits the viewport to show both the user's location and selected launchpad, with optimized update intervals for smooth performance.
+### 🗺️ Interactive Maps
+- **Google Maps integration** for Android devices
+- **Apple Maps integration** for iOS devices
+- **Launchpad markers** with detailed information
+- **User location tracking** with permission handling
+- **Distance calculations** from your location to launchpads
+- **Navigation integration** to open external map apps
 
-### **Map Performance Optimizations**
-- **Marker Clustering**: Efficient rendering of multiple launchpad locations
-- **Viewport Optimization**: Automatic fitting to show both user and launchpad locations
-- **Memory Management**: Proper cleanup of map resources and event listeners
+### 🎨 Modern UI/UX
+- **Professional design system** with consistent styling
+- **Smooth animations** and transitions
+- **Responsive layout** for all screen sizes
+- **Dark/light theme support** (system-based)
+- **Loading states** and error handling
+- **Pull-to-refresh** functionality
 
-## 🔐 Permission Flows and Handling
-
-### **Location Permission Flow**
-1. **Initial Request**: App requests location permission on first map access
-2. **Permission Types**:
-   - `ACCESS_FINE_LOCATION` (Android)
-   - `NSLocationWhenInUseUsageDescription` (iOS)
-3. **User Choices**: Allow, Deny, or Don't Ask Again
-
-### **Permission Handling Implementation**
-The app implements a comprehensive permission flow that requests location access with user-friendly messaging. When permission is granted, it acquires the current location with high accuracy and a 15-second timeout. If permission is denied, it shows a clear UI explaining why location is needed and provides an "Enable Location" button that directs users to device settings.
-
-### **Permission States and UX**
-- **Loading State**: Spinner while acquiring location
-- **Permission Denied**: Clear card explaining why location is needed
-- **Enable Location Button**: Direct link to device settings
-- **Graceful Fallback**: App works without location (shows launchpad only)
-
-### **Error Handling for Permissions**
-- **Timeout Handling**: 15-second timeout for location acquisition
-- **Accuracy Fallback**: Falls back to lower accuracy if high accuracy fails
-- **Network Dependency**: Handles cases where location services are unavailable
-
-## 📱 App Screenshots
-
-### **Launch List Screen**
-![Launch List](assets/1.jpg)
-- **Infinite Scroll**: Smooth pagination with 10 launches per page
-- **Search Bar**: Real-time filtering with debounced input
-- **Status Badges**: Color-coded launch status indicators
-- **Mission Patches**: Optimized image loading with placeholders
-- **Pull-to-Refresh**: Latest data updates
-
-### **Launch Detail Screen**
-![Launch Details](assets/2.jpg)
-- **Mission Information**: Complete launch details and timeline
-- **Launchpad Data**: Location, name, and full details
-- **Mission Patch**: High-quality mission patch images
-- **View on Map Button**: Direct navigation to map with launchpad location
-- **Wikipedia Integration**: External links for additional information
-
-### **Map Screen**
-- **Interactive Map**: Google Maps integration with launchpad markers
-- **User Location**: Current position with distance calculations
-- **Launchpad Markers**: Red pins with launch site information
-- **Navigation Options**: External maps integration (Google Maps/Apple Maps)
-- **Permission States**: Clear UI for location permission handling
-
-### **Key UI Elements**
-- **Safe Area Handling**: Content respects device notches and system UI
-- **Professional Styling**: Consistent design system with proper spacing
-- **Loading States**: Smooth transitions and loading indicators
-- **Error Boundaries**: Graceful error handling with retry options
-- **Responsive Design**: Optimized for various screen sizes
+### 🔧 Technical Features
+- **TypeScript** for type safety
+- **State management** with Zustand
+- **Image optimization** and preloading
+- **Offline support** with graceful error handling
+- **Performance optimization** with React.memo and useMemo
+- **Comprehensive error boundaries**
 
 ## 🛠️ Tech Stack
 
-- **Framework**: React Native with Expo
+- **Framework**: React Native with Expo SDK 53
 - **Language**: TypeScript
-- **Navigation**: React Navigation (Native Stack + Bottom Tabs)
+- **Navigation**: React Navigation v6
 - **State Management**: Zustand
-- **Maps**: React Native Maps + Google Maps API
-- **HTTP Client**: Axios
+- **Maps**: React Native Maps
+- **HTTP Client**: Axios with interceptors
 - **Location Services**: Expo Location
 - **Code Quality**: ESLint + Prettier
-- **Design System**: Centralized constants for colors, typography, spacing, and shadows
+- **Design System**: Centralized constants and styles
 
-## 🏗️ Architecture
+## 🏗️ Project Architecture
 
-### Project Structure
 ```
 src/
 ├── api/           # API integration and types
+│   ├── client.ts  # Axios configuration
+│   ├── launches.ts # SpaceX API calls
+│   └── types.ts   # API data models
 ├── components/    # Reusable UI components
+│   ├── ErrorBoundary.tsx
+│   ├── LaunchItem.tsx
+│   ├── MapViewComponent.tsx
+│   └── SearchBar.tsx
 ├── hooks/         # Custom React hooks
+│   ├── useImageOptimization.ts
+│   └── useLocation.ts
 ├── navigation/    # Navigation configuration
+│   ├── BottomTabs.tsx
+│   └── RootStack.tsx
 ├── screens/       # Main app screens
+│   ├── LaunchDetailScreen.tsx
+│   ├── LaunchListScreen.tsx
+│   └── MapScreen.tsx
 ├── store/         # Zustand state management
-└── utils/         # Utility functions and constants
+│   └── launcheStore.ts
+└── utils/         # Utility functions
+    ├── constants.ts
+    ├── distanceCalculator.ts
+    └── logger.ts
 ```
 
-### Key Components
-- **ErrorBoundary**: Catches and handles JavaScript errors gracefully
-- **LaunchItem**: Displays individual launch information with image optimization
-- **MapViewComponent**: Wrapper for React Native Maps with Google provider
-- **SearchBar**: Search functionality with consistent styling and clear button
-- **ErrorState**: User-friendly error display with retry options
-
-### State Management
-- **Zustand Store**: Manages launches, launchpads, and app state
-- **Automatic Retry**: Built-in retry mechanism for failed API calls
-- **Pagination**: Efficient data loading with infinite scroll
-- **Image Optimization**: Background preloading and caching strategies
-
-## 🚀 Getting Started
+## 🚀 Installation & Setup
 
 ### Prerequisites
-- Node.js (v16 or higher)
-- npm or yarn
-- Expo CLI
-- iOS Simulator (macOS) or Android Emulator
-- Google Maps API Key (for map functionality)
 
-### Installation
+- **Node.js** (v16 or higher)
+- **npm** or **yarn** package manager
+- **Expo CLI** (`npm install -g @expo/cli`)
+- **Mobile device** or **emulator** for testing
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/its221b/spacex-launch-explorer.git
-   cd spacex-launch-explorer
-   ```
+### Step 1: Clone the Repository
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Environment Setup**
-   ```bash
-   # Copy environment template
-   cp .env.example .env
-   
-   # Add your Google Maps API keys
-   GOOGLE_MAPS_API_KEY_ANDROID=your_android_key_here
-   GOOGLE_MAPS_API_KEY_IOS=your_ios_key_here
-   ```
-
-4. **Start the development server**
-   ```bash
-   npm start
-   ```
-
-5. **Run on device/simulator**
-   - Scan QR code with Expo Go app (mobile)
-   - Press `a` for Android emulator
-   - Press `i` for iOS simulator
-   - Press `w` for web browser
-
-### Development Scripts
-
-- `npm start` - Start Expo development server
-- `npm run android` - Run on Android emulator
-- `npm run ios` - Run on iOS simulator
-- `npm run web` - Run in web browser
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint issues automatically
-- `npm run format` - Format code with Prettier
-- `npm run format:check` - Check code formatting
-
-## 🔧 Development
-
-### Code Quality
-- **ESLint**: Code linting with React Native and TypeScript rules
-- **Prettier**: Automatic code formatting
-- **TypeScript**: Full type safety throughout the application
-
-### Design System
-The app uses a centralized design system located in `src/utils/constants.ts`:
-
-- **Colors**: Primary, secondary, status, and neutral color palettes
-- **Typography**: Font sizes, weights, and line heights
-- **Spacing**: Consistent spacing scale (4px base unit)
-- **Shadows**: Platform-specific shadow configurations
-- **Border Radius**: Standardized border radius values
-
-### Adding New Features
-1. **Components**: Add to `src/components/` with consistent styling
-2. **Screens**: Add to `src/screens/` following existing patterns
-3. **Utilities**: Add to `src/utils/` with proper TypeScript types
-4. **Constants**: Update `src/utils/constants.ts` for new design tokens
-
-### API Integration
-- **Base URL**: SpaceX public API
-- **Endpoints**: Launches, launch details, and launchpad information
-- **Error Handling**: Comprehensive error handling with user-friendly messages
-- **Retry Logic**: Automatic retry for network failures
-
-## 📊 Performance Features
-
-- **Infinite Scroll**: Efficient data loading for large lists
-- **Image Optimization**: Proper image handling with placeholders and preloading
-- **Memoization**: React.memo and useMemo for performance optimization
-- **Lazy Loading**: Components loaded only when needed
-- **FlatList Optimization**: Reduced batch sizes and memory management
-
-## 🧪 Testing
-
-### Manual Testing
-- Test on both iOS and Android devices/simulators
-- Verify error handling with network issues
-- Test location permissions and map functionality
-- Verify search and filtering functionality
-- Test image loading and optimization features
-
-### Code Quality Checks
 ```bash
-# Run all quality checks
-npm run lint && npx tsc --noEmit && npm run format:check
+git clone https://github.com/yourusername/spacex-launch-explorer.git
+cd spacex-launch-explorer
 ```
 
-## 🔍 Troubleshooting
+### Step 2: Install Dependencies
+
+```bash
+npm install
+# or
+yarn install
+```
+
+### Step 3: Environment Configuration
+
+Create a `.env` file in the root directory:
+
+```bash
+# Google Maps API Key (required for Android maps)
+GOOGLE_MAPS_API_KEY_ANDROID=your_google_maps_api_key_here
+
+# Note: iOS uses Apple Maps by default, no API key needed
+```
+
+**How to get Google Maps API Key:**
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing one
+3. Enable Maps SDK for Android
+4. Create credentials (API Key)
+5. Restrict the key to Android apps only
+
+### Step 4: Start Development Server
+
+```bash
+npm start
+# or
+npx expo start
+```
+
+### Step 5: Run on Device/Simulator
+
+- **Mobile Device**: Scan QR code with Expo Go app
+- **Android Emulator**: Press `a` in terminal
+- **iOS Simulator**: Press `i` in terminal (macOS only)
+- **Web Browser**: Press `w` in terminal
+
+## 📱 How to Use the App
+
+### 1. Launch List Screen
+- **Browse launches**: Scroll through all SpaceX launches
+- **Search**: Use the search bar to find specific missions
+- **Pull to refresh**: Get the latest launch data
+- **Tap launch**: View detailed information about a mission
+
+### 2. Launch Detail Screen
+- **Mission information**: Complete launch details and timeline
+- **Mission patch**: High-quality mission patch images
+- **Launchpad data**: Location and facility information
+- **View on Map**: Navigate to map showing launchpad location
+- **Wikipedia**: External links for additional information
+
+### 3. Map Screen
+- **Interactive map**: View launchpad locations worldwide
+- **User location**: See your current position (requires permission)
+- **Distance calculation**: Real-time distance to launchpads
+- **Navigation**: Open external maps for directions
+- **Marker information**: Tap markers for launchpad details
+
+## 🔧 Development Commands
+
+```bash
+# Start development server
+npm start
+
+# Run on specific platform
+npm run android
+npm run ios
+npm run web
+
+# Code quality
+npm run lint          # Check for linting issues
+npm run lint:fix      # Auto-fix linting issues
+npm run format        # Format code with Prettier
+npm run format:check  # Check code formatting
+
+# Type checking
+npx tsc --noEmit      # Check TypeScript types
+```
+
+## 🎨 Design System
+
+The app uses a centralized design system in `src/utils/constants.ts`:
+
+### Colors
+- **Primary**: `#007AFF` (iOS blue)
+- **Secondary**: `#34C759` (success green)
+- **Map Colors**: Launchpad (red), User Location (blue)
+
+### Typography
+- **Font Sizes**: 12px to 48px scale
+- **Font Weights**: 400 (normal) to 700 (bold)
+- **Line Heights**: 1.2 (tight) to 1.75 (relaxed)
+
+### Spacing
+- **Base Unit**: 4px
+- **Scale**: xs(4px) to 4xl(48px)
+- **Component-specific**: Card, button, and input spacing
+
+## 🔐 Permissions & Privacy
+
+### Location Permission
+- **Purpose**: Calculate distance to launchpads and show user location on map
+- **Permission Type**: `ACCESS_FINE_LOCATION` (Android), `NSLocationWhenInUseUsageDescription` (iOS)
+- **User Control**: Can deny permission, app works without location
+- **Data Usage**: Location data never leaves your device
+
+### Network Permission
+- **Purpose**: Fetch SpaceX launch data and mission information
+- **Data**: Public SpaceX API data only
+- **Privacy**: No personal data collection or tracking
+
+## 🚨 Troubleshooting
 
 ### Common Issues
-1. **Metro bundler issues**: Clear cache with `npx expo start --clear`
-2. **TypeScript errors**: Run `npx tsc --noEmit` to check types
-3. **Formatting issues**: Run `npm run format` to fix Prettier issues
-4. **Linting errors**: Run `npm run lint:fix` to auto-fix issues
-5. **Map not loading**: Verify Google Maps API key in `.env` file
 
-### Network Issues
-- The app includes automatic retry mechanisms
-- Check SpaceX API status if experiencing persistent issues
-- Verify network connectivity and permissions
+1. **Metro bundler errors**
+   ```bash
+   npx expo start --clear
+   ```
 
-## 📚 API Documentation
+2. **TypeScript errors**
+   ```bash
+   npx tsc --noEmit
+   ```
 
-### SpaceX API Endpoints
-- **Launches**: `POST /v5/launches/query` - List launches with pagination
-- **Launch Details**: `GET /v5/launches/{id}` - Specific launch information
-- **Launchpads**: `GET /v4/launchpads/{id}` - Launchpad details
+3. **Map not loading on Android**
+   - Verify Google Maps API key in `.env`
+   - Check API key restrictions in Google Cloud Console
+   - Ensure billing is enabled for Google Cloud project
 
-### Data Models
-- **Launch**: Mission details, dates, status, and links
-- **Launchpad**: Location information and details
-- **LaunchLinks**: Mission patches and Wikipedia links
+4. **Location not working**
+   - Grant location permission in device settings
+   - Check if location services are enabled
+   - Verify app has location permission
+
+5. **Network errors**
+   - Check internet connection
+   - Verify SpaceX API is accessible
+   - App includes automatic retry mechanisms
+
+### Performance Issues
+
+- **Slow scrolling**: Reduce batch size in `launcheStore.ts`
+- **Memory issues**: Clear app cache or restart device
+- **Map lag**: Check device performance and close other apps
+
+## 📊 API Integration
+
+### SpaceX API
+- **Base URL**: `https://api.spacexdata.com`
+- **Endpoints**: Launches, launchpads, and mission data
+- **Rate Limiting**: Public API with reasonable limits
+- **Data Format**: JSON with comprehensive mission information
+
+### Error Handling
+- **Network errors**: Automatic retry with exponential backoff
+- **API errors**: User-friendly error messages
+- **Offline support**: Graceful degradation when network unavailable
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+We welcome contributions! Here's how to get started:
+
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Make your changes** following the existing code patterns
+4. **Test thoroughly** on both iOS and Android
+5. **Commit your changes**: `git commit -m 'Add amazing feature'`
+6. **Push to branch**: `git push origin feature/amazing-feature`
+7. **Open a Pull Request**
 
 ### Development Guidelines
-- Follow existing code patterns and architecture
 - Use TypeScript for all new code
+- Follow existing component patterns
 - Maintain consistent styling using the design system
 - Add proper error handling for new features
 - Update documentation for significant changes
@@ -280,19 +293,20 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **SpaceX**: For providing the public API
-- **Expo**: For the excellent development platform
-- **React Native Community**: For the amazing ecosystem
-- **Open Source Contributors**: For the tools and libraries used
+- **SpaceX** for providing the public API and inspiring space exploration
+- **Expo** for the excellent development platform and tools
+- **React Native Community** for the amazing ecosystem and libraries
+- **Open Source Contributors** for the tools and libraries that make this possible
 
-## 📞 Support
+## 📞 Support & Community
 
-For development questions or issues:
-- Check the troubleshooting section above
-- Review the code structure and patterns
-- Ensure all dependencies are properly installed
-- Verify TypeScript and ESLint configurations
+- **Issues**: Report bugs and request features via GitHub Issues
+- **Discussions**: Join community discussions on GitHub Discussions
+- **Documentation**: Check the code comments and TypeScript types
+- **Contributing**: See the contributing guidelines above
 
 ---
 
-**Happy coding! 🚀✨**
+**Ready to explore space? 🚀 Download the app and start your journey through SpaceX launches!**
+
+*Built with ❤️ for the space community*

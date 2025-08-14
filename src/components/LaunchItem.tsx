@@ -21,7 +21,7 @@ export default function LaunchItem({ launch }: Props) {
   const navigation = useNavigation<any>();
   const status = getLaunchStatus(launch);
   const statusStyle = getLaunchStatusStyle(status);
-  
+
   // Use the image optimization hook
   const { optimizedUrl, isLoading, hasError, isLoaded, retry } = useImageOptimization({
     imageUrl: launch.links?.patch?.small || launch.links?.patch?.large || null,
@@ -44,23 +44,19 @@ export default function LaunchItem({ launch }: Props) {
   }, []);
 
   return (
-    <TouchableOpacity 
-      style={styles.container} 
-      onPress={handlePress}
-      activeOpacity={0.7}
-    >
+    <TouchableOpacity style={styles.container} onPress={handlePress} activeOpacity={0.7}>
       <View style={styles.content}>
         <View style={styles.imageContainer}>
           {optimizedUrl ? (
             <View style={styles.imageWrapper}>
-              <Image 
-                source={{ 
+              <Image
+                source={{
                   uri: optimizedUrl,
-                  cache: 'force-cache' // Force cache for better performance
-                }} 
+                  cache: 'force-cache', // Force cache for better performance
+                }}
                 style={[
                   styles.image,
-                  { opacity: isLoaded ? 1 : 0.3 } // Fade in effect
+                  { opacity: isLoaded ? 1 : 0.3 }, // Fade in effect
                 ]}
                 onLoadStart={handleImageLoadStart}
                 onLoadEnd={handleImageLoadEnd}
@@ -68,14 +64,14 @@ export default function LaunchItem({ launch }: Props) {
                 fadeDuration={300} // Smooth fade-in
                 resizeMode="contain"
               />
-              
+
               {/* Loading Overlay */}
               {isLoading && !isLoaded && (
                 <View style={styles.loadingOverlay}>
                   <ActivityIndicator size="small" color={COLORS.primary} />
                 </View>
               )}
-              
+
               {/* Error State with Retry */}
               {hasError && (
                 <TouchableOpacity style={styles.errorOverlay} onPress={retry}>

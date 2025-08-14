@@ -28,8 +28,6 @@ type Actions = {
   retryLaunches: () => Promise<void>;
 
   fetchLaunchpadById: (id: string) => Promise<void>;
-  setSelectedLaunchpad: (pad: Launchpad | null) => void;
-  clearSelectedLaunchpad: () => void;
   setSelectedLaunchpadId: (id: string | null) => void;
   clearError: () => void;
   clearSelectedLaunchpadId: () => void;
@@ -39,7 +37,7 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
   // Helper function to ensure unique launches
   const ensureUniqueLaunches = (launches: Launch[]): Launch[] => {
     const seen = new Set();
-    return launches.filter(launch => {
+    return launches.filter((launch) => {
       if (seen.has(launch.id)) {
         return false;
       }
@@ -110,16 +108,16 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
     loadMore: async () => {
       const { searchQuery, loadingMore, hasNextPage, currentPage } = get();
       if (loadingMore || !hasNextPage) return;
-      
+
       set({ loadingMore: true });
       try {
         const nextPage = currentPage + 1;
         const data = await getLaunches(nextPage, 10, searchQuery);
-        
+
         // Prevent duplicate launches by checking IDs
-        const existingIds = new Set(get().launches.map(launch => launch.id));
-        const newLaunches = data.docs.filter(launch => !existingIds.has(launch.id));
-        
+        const existingIds = new Set(get().launches.map((launch) => launch.id));
+        const newLaunches = data.docs.filter((launch) => !existingIds.has(launch.id));
+
         if (newLaunches.length > 0) {
           set((state) => ({
             launches: ensureUniqueLaunches([...state.launches, ...newLaunches]),
@@ -127,8 +125,10 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
             loadingMore: false,
             currentPage: nextPage,
           }));
-          
-          logInfo(`Loaded more launches: page ${nextPage}, added ${newLaunches.length} new launches`);
+
+          logInfo(
+            `Loaded more launches: page ${nextPage}, added ${newLaunches.length} new launches`,
+          );
         } else {
           // No new launches, mark as no more pages
           set({ hasNextPage: false, loadingMore: false });
@@ -146,7 +146,7 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
         logInfo(`Searching launches for: "${query}"`);
         const data = await getLaunches(1, 10, query);
         const uniqueLaunches = ensureUniqueLaunches(data.docs);
-        
+
         set({
           launches: uniqueLaunches,
           hasNextPage: data.hasNextPage,
@@ -154,7 +154,7 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
           retryCount: 0,
           currentPage: 1,
         });
-        
+
         logInfo(`Search results: ${uniqueLaunches.length} launches found`);
       } catch (error: any) {
         const errorMessage = 'Failed to search launches. Please try again.';
@@ -216,8 +216,6 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
       }
     },
 
-    setSelectedLaunchpad: (pad) => set({ selectedLaunchpad: pad }),
-    clearSelectedLaunchpad: () => set({ selectedLaunchpad: null }),
     setSelectedLaunchpadId: (id) => set({ selectedLaunchpadId: id }),
     clearSelectedLaunchpadId: () => set({ selectedLaunchpadId: null }),
     clearError: () => set({ error: null, retryCount: 0 }),

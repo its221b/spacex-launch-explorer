@@ -49,6 +49,12 @@ export const COLORS = {
 
   // Shadow Colors
   shadow: '#000',
+
+  // Map Colors
+  map: {
+    launchpad: '#FF4444',
+    userLocation: '#4444FF',
+  },
 } as const;
 
 // Typography

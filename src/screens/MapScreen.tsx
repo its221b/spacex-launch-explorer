@@ -47,7 +47,9 @@ export default function MapScreen() {
         <View style={styles.center}>
           <Ionicons name="map" size={64} color={COLORS.textSecondary} />
           <Text style={styles.loadingText}>No Launchpad Selected</Text>
-          <Text style={[styles.loadingText, { fontSize: TYPOGRAPHY.size.sm, marginTop: SPACING.sm }]}>
+          <Text
+            style={[styles.loadingText, { fontSize: TYPOGRAPHY.size.sm, marginTop: SPACING.sm }]}
+          >
             Select a launch from the Launches tab to view its location on the map.
           </Text>
         </View>
@@ -62,11 +64,12 @@ export default function MapScreen() {
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           {
             title: 'Location Permission',
-            message: 'This app needs access to your location to show you where you are relative to the launchpad.',
+            message:
+              'This app needs access to your location to show you where you are relative to the launchpad.',
             buttonNeutral: 'Ask Me Later',
             buttonNegative: 'Cancel',
             buttonPositive: 'OK',
-          }
+          },
         );
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
           setPermissionRequested(true);
@@ -79,23 +82,23 @@ export default function MapScreen() {
 
   const openDirections = () => {
     if (!selectedLaunchpad) return;
-    
+
     const { latitude, longitude, name } = selectedLaunchpad;
     const label = encodeURIComponent(name || 'Launchpad');
     const latlng = `${latitude},${longitude}`;
-    
+
     let url: string;
     if (Platform.OS === 'ios') {
       url = `http://maps.apple.com/?daddr=${latlng}&q=${label}`;
     } else {
       url = `https://www.google.com/maps/dir/?api=1&destination=${latlng}&travelmode=driving`;
     }
-    
+
     Linking.openURL(url).catch(() => {
       Alert.alert(
-        'Navigation Error', 
+        'Navigation Error',
         'Could not open Maps app. Please make sure you have a maps application installed.',
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
     });
   };
@@ -132,38 +135,36 @@ export default function MapScreen() {
               {selectedLaunchpad.full_name || selectedLaunchpad.name}
             </Text>
           </View>
-          
+
           {selectedLaunchpad.locality && selectedLaunchpad.region && (
             <Text style={styles.launchpadLocation}>
               {selectedLaunchpad.locality}, {selectedLaunchpad.region}
             </Text>
           )}
-          
+
           {distance && (
             <View style={styles.distanceContainer}>
               <Ionicons name="location" size={16} color={COLORS.primary} />
               <Text style={styles.distanceText}>{formatDistance(distance)} away</Text>
             </View>
           )}
-          
+
           {!distance && location.coords && (
             <View style={styles.distanceContainer}>
               <Ionicons name="location" size={16} color={COLORS.textSecondary} />
-              <Text style={[styles.distanceText, { color: COLORS.textSecondary }]}>Calculating distance...</Text>
+              <Text style={[styles.distanceText, { color: COLORS.textSecondary }]}>
+                Calculating distance...
+              </Text>
             </View>
           )}
-          
+
           {!location.coords && !location.loading && (
             <View style={styles.distanceContainer}>
               <Ionicons name="location" size={16} color={COLORS.textSecondary} />
-              <Text style={[styles.distanceText, { color: COLORS.textSecondary }]}>Enable location to see distance</Text>
+              <Text style={[styles.distanceText, { color: COLORS.textSecondary }]}>
+                Enable location to see distance
+              </Text>
             </View>
-          )}
-          
-          {selectedLaunchpad.details && (
-            <Text style={styles.launchpadDetails} numberOfLines={2}>
-              {selectedLaunchpad.details}
-            </Text>
           )}
         </View>
 
@@ -175,12 +176,10 @@ export default function MapScreen() {
               <Text style={styles.permissionTitle}>Location Access Required</Text>
             </View>
             <Text style={styles.permissionText}>
-              Enable location permissions to see your position and calculate distance to the launchpad.
+              Enable location permissions to see your position and calculate distance to the
+              launchpad.
             </Text>
-            <TouchableOpacity 
-              style={styles.permissionButton} 
-              onPress={requestLocationPermission}
-            >
+            <TouchableOpacity style={styles.permissionButton} onPress={requestLocationPermission}>
               <Text style={styles.permissionButtonText}>Enable Location</Text>
             </TouchableOpacity>
           </View>

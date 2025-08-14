@@ -19,18 +19,20 @@ class ImagePreloader {
       }
 
       // Use React Native's built-in prefetch method
-      import('react-native').then(({ Image }) => {
-        Image.prefetch(url)
-          .then(() => {
-            this.preloadedImages.add(url);
-            resolve(true);
-          })
-          .catch(() => {
-            resolve(false);
-          });
-      }).catch(() => {
-        resolve(false);
-      });
+      import('react-native')
+        .then(({ Image }) => {
+          Image.prefetch(url)
+            .then(() => {
+              this.preloadedImages.add(url);
+              resolve(true);
+            })
+            .catch(() => {
+              resolve(false);
+            });
+        })
+        .catch(() => {
+          resolve(false);
+        });
     });
   }
 
@@ -62,7 +64,7 @@ class ImagePreloader {
    */
   queueForPreload(urls: string[]): void {
     this.preloadQueue.push(...urls);
-    
+
     if (!this.isProcessing) {
       this.processQueue();
     }
@@ -80,7 +82,7 @@ class ImagePreloader {
 
     while (this.preloadQueue.length > 0) {
       const batch = this.preloadQueue.splice(0, 5); // Process 5 at a time
-      
+
       try {
         await this.preloadImages(batch);
       } catch (error) {
@@ -88,7 +90,7 @@ class ImagePreloader {
       }
 
       // Small delay to prevent blocking the main thread
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     this.isProcessing = false;
