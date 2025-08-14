@@ -74,7 +74,7 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
   const openMap = () => {
     if (launch?.launchpad) {
       setSelectedLaunchpadId(launch.launchpad);
-      navigation.navigate('Main' as never);
+      navigation.navigate('Main', { screen: 'Map', params: { launchpadId: launch.launchpad } });
     }
   };
 
@@ -90,7 +90,7 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
   const statusStyle = getLaunchStatusStyle(status);
 
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.background, paddingTop: insets.top }}>
+    <View style={{ flex: 1, backgroundColor: COLORS.background }}>
       <ScrollView 
         style={styles.container}
         contentInsetAdjustmentBehavior="automatic"
@@ -155,7 +155,9 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
                   </View>
                 )}
                 {launchpad.details && (
-                  <Text style={styles.launchpadDetails}>{launchpad.details}</Text>
+                  <View style={styles.launchpadDetailsContainer}>
+                    <Text style={styles.launchpadDetails}>{launchpad.details}</Text>
+                  </View>
                 )}
                 {launchpad.latitude && launchpad.longitude && (
                   <View style={styles.coordinatesContainer}>
@@ -272,6 +274,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     padding: SPACING.md,
     borderRadius: BORDER_RADIUS.md,
+    minHeight: 80,
   },
   launchpadHeader: {
     flexDirection: 'row',
@@ -294,11 +297,18 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     marginLeft: SPACING.sm,
   },
+  launchpadDetailsContainer: {
+    marginBottom: SPACING.sm,
+    paddingHorizontal: SPACING.xs,
+  },
   launchpadDetails: {
     fontSize: TYPOGRAPHY.size.sm,
     color: COLORS.textSecondary,
-    lineHeight: TYPOGRAPHY.lineHeight.normal,
-    marginBottom: SPACING.sm,
+    lineHeight: TYPOGRAPHY.size.sm * TYPOGRAPHY.lineHeight.normal,
+    textAlign: 'left',
+    backgroundColor: COLORS.primaryLight,
+    padding: SPACING.xs,
+    borderRadius: BORDER_RADIUS.xs,
   },
   coordinatesContainer: {
     flexDirection: 'row',

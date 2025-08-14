@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { View, StyleSheet } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE, PROVIDER_DEFAULT } from 'react-native-maps';
+import { View, StyleSheet, Platform } from 'react-native';
 
 type LaunchpadMarker = {
   latitude: number;
@@ -16,6 +16,9 @@ export default function MapViewComponent({
   user?: { latitude: number; longitude: number };
 }) {
   const mapRef = useRef<MapView>(null);
+  
+  // Use Google Maps for Android, Apple Maps for iOS
+  const mapProvider = Platform.OS === 'android' ? PROVIDER_GOOGLE : PROVIDER_DEFAULT;
   
   const region = {
     latitude: launchpad.latitude,
@@ -46,7 +49,7 @@ export default function MapViewComponent({
         style={styles.map} 
         initialRegion={region} 
         mapType="standard"
-        provider={PROVIDER_GOOGLE}
+        provider={mapProvider}
         showsUserLocation={true}
         showsMyLocationButton={true}
         showsCompass={true}
