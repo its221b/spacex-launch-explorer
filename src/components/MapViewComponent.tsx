@@ -18,21 +18,16 @@ export default function MapViewComponent({
 }) {
   const mapRef = useRef<MapView>(null);
 
-  // Use Google Maps for Android, Apple Maps for iOS
   const mapProvider = Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined;
 
-  // Calculate better initial region to show both locations
   const region = useMemo(() => {
     if (user) {
-      // Calculate center between launchpad and user
       const centerLat = (launchpad.latitude + user.latitude) / 2;
       const centerLng = (launchpad.longitude + user.longitude) / 2;
 
-      // Calculate distance and set appropriate zoom
       const latDiff = Math.abs(launchpad.latitude - user.latitude);
       const lngDiff = Math.abs(launchpad.longitude - user.longitude);
 
-      // Add padding to ensure both locations are visible
       const latitudeDelta = Math.max(latDiff * 2, 0.05);
       const longitudeDelta = Math.max(lngDiff * 2, 0.05);
 
@@ -43,7 +38,6 @@ export default function MapViewComponent({
         longitudeDelta,
       };
     } else {
-      // If no user location, center on launchpad with default zoom
       return {
         latitude: launchpad.latitude,
         longitude: launchpad.longitude,
@@ -53,7 +47,6 @@ export default function MapViewComponent({
     }
   }, [launchpad, user]);
 
-  // Fit map to show both launchpad and user location
   useEffect(() => {
     if (mapRef.current && user) {
       const coordinates = [
@@ -88,7 +81,6 @@ export default function MapViewComponent({
         userLocationUpdateInterval={5000}
         userLocationFastestInterval={2000}
       >
-        {/* Launchpad Marker */}
         <Marker
           coordinate={{ latitude: launchpad.latitude, longitude: launchpad.longitude }}
           title={launchpad.title || 'Launchpad'}
@@ -96,10 +88,9 @@ export default function MapViewComponent({
           pinColor="red"
         />
 
-        {/* Launchpad Label - Positioned above marker */}
         <Marker
           coordinate={{
-            latitude: launchpad.latitude + 0.005, // Much above the actual marker
+            latitude: launchpad.latitude + 0.005,
             longitude: launchpad.longitude,
           }}
           tracksViewChanges={false}
@@ -109,7 +100,6 @@ export default function MapViewComponent({
           </View>
         </Marker>
 
-        {/* User Location Marker (if coordinates available) */}
         {user && (
           <Marker
             coordinate={user}
@@ -120,11 +110,10 @@ export default function MapViewComponent({
           />
         )}
 
-        {/* User Location Label - Positioned above marker */}
         {user && (
           <Marker
             coordinate={{
-              latitude: user.latitude + 0.005, // Much above the actual marker
+              latitude: user.latitude + 0.005,
               longitude: user.longitude,
             }}
             tracksViewChanges={false}
@@ -148,7 +137,7 @@ const styles = StyleSheet.create({
   },
 
   markerLabel: {
-    backgroundColor: COLORS.map.launchpad, // Default background
+    backgroundColor: COLORS.map.launchpad,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,

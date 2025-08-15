@@ -39,23 +39,19 @@ export default function LaunchListScreen() {
   const [localSearchQuery, setLocalSearchQuery] = useState('');
 
   useEffect(() => {
-    // Wait for app to be fully ready before making API calls
     const handleAppStateChange = (nextAppState: string) => {
       if (nextAppState === 'active') {
-        // App is now active, wait a bit more for network stack to be ready
         setTimeout(() => {
           initLaunches();
         }, 500);
       }
     };
 
-    // Listen for app state changes
     const subscription = AppState.addEventListener('change', handleAppStateChange);
 
-    // Initial call with delay
     const timer = setTimeout(() => {
       initLaunches();
-    }, 1500); // 1.5 second delay
+    }, 1500);
 
     return () => {
       clearTimeout(timer);
@@ -63,7 +59,6 @@ export default function LaunchListScreen() {
     };
   }, [initLaunches]);
 
-  // Preload images when launches change
   useEffect(() => {
     if (launches.length > 0) {
       const imageUrls = launches
@@ -71,13 +66,11 @@ export default function LaunchListScreen() {
         .filter(Boolean) as string[];
 
       if (imageUrls.length > 0) {
-        // Queue images for background preloading
         imagePreloader.queueForPreload(imageUrls);
       }
     }
   }, [launches]);
 
-  // Debounced search
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (localSearchQuery !== searchQuery) {
@@ -98,7 +91,6 @@ export default function LaunchListScreen() {
   );
 
   const keyExtractor = useCallback((item: any, index: number) => {
-    // Use both ID and index to ensure unique keys
     return `${item.id}-${index}`;
   }, []);
 
@@ -191,19 +183,18 @@ export default function LaunchListScreen() {
           ListFooterComponent={renderFooter}
           showsVerticalScrollIndicator={false}
           removeClippedSubviews={true}
-          maxToRenderPerBatch={8} // Reduced for better performance
-          windowSize={8} // Reduced window size
-          initialNumToRender={6} // Reduced initial render
+          maxToRenderPerBatch={8}
+          windowSize={8}
+          initialNumToRender={6}
           getItemLayout={undefined}
           maintainVisibleContentPosition={{
             minIndexForVisible: 0,
             autoscrollToTopThreshold: 10,
           }}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
-          // Additional performance optimizations
           updateCellsBatchingPeriod={50}
           disableVirtualization={false}
-          scrollEventThrottle={16} // 60fps scrolling
+          scrollEventThrottle={16}
           decelerationRate="fast"
           snapToAlignment="start"
         />

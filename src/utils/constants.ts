@@ -1,15 +1,10 @@
-// Design System Constants
-// Colors
 export const COLORS = {
-  // Primary Colors
   primary: '#007AFF',
   primaryLight: '#e7f0ff',
 
-  // Secondary Colors
   secondary: '#34C759',
   secondaryLight: '#e7f7e7',
 
-  // Status Colors
   success: '#34C759',
   successLight: '#e7f7e7',
   warning: '#ff6b6b',
@@ -17,7 +12,6 @@ export const COLORS = {
   error: '#ff6b6b',
   errorLight: '#ffe7e7',
 
-  // Neutral Colors
   white: '#fff',
   black: '#000',
   gray: {
@@ -32,34 +26,27 @@ export const COLORS = {
     800: '#333',
   },
 
-  // Background Colors
   background: '#fff',
   surface: '#f8f9fa',
   card: '#fff',
 
-  // Text Colors
   textPrimary: '#333',
   textSecondary: '#666',
   textTertiary: '#999',
   textMuted: '#ccc',
 
-  // Border Colors
   border: '#e8e8e8',
   borderLight: '#f0f0f0',
 
-  // Shadow Colors
   shadow: '#000',
 
-  // Map Colors
   map: {
     launchpad: '#FF4444',
     userLocation: '#4444FF',
   },
 } as const;
 
-// Typography
 export const TYPOGRAPHY = {
-  // Font Sizes
   size: {
     xs: 12,
     sm: 14,
@@ -71,7 +58,6 @@ export const TYPOGRAPHY = {
     '4xl': 48,
   },
 
-  // Font Weights
   weight: {
     normal: '400',
     medium: '500',
@@ -79,7 +65,6 @@ export const TYPOGRAPHY = {
     bold: '700',
   },
 
-  // Line Heights
   lineHeight: {
     tight: 1.2,
     normal: 1.5,
@@ -87,12 +72,9 @@ export const TYPOGRAPHY = {
   },
 } as const;
 
-// Spacing
 export const SPACING = {
-  // Base spacing unit
   base: 4,
 
-  // Common spacing values
   xs: 4,
   sm: 8,
   md: 12,
@@ -102,7 +84,6 @@ export const SPACING = {
   '3xl': 32,
   '4xl': 48,
 
-  // Component-specific spacing
   card: {
     padding: 16,
     margin: 16,
@@ -117,7 +98,6 @@ export const SPACING = {
   },
 } as const;
 
-// Border Radius
 export const BORDER_RADIUS = {
   xs: 4,
   sm: 8,
@@ -127,7 +107,6 @@ export const BORDER_RADIUS = {
   full: 9999,
 } as const;
 
-// Shadows
 export const SHADOWS = {
   sm: {
     shadowColor: COLORS.shadow,
@@ -159,7 +138,6 @@ export const SHADOWS = {
   },
 } as const;
 
-// Launch Status Constants
 export const LAUNCH_STATUS = {
   UPCOMING: 'upcoming',
   SUCCESS: 'success',
@@ -169,7 +147,6 @@ export const LAUNCH_STATUS = {
 
 export type LaunchStatusType = (typeof LAUNCH_STATUS)[keyof typeof LAUNCH_STATUS];
 
-// Launch Status Styles
 export const getLaunchStatusStyle = (status: LaunchStatusType) => {
   switch (status) {
     case LAUNCH_STATUS.UPCOMING:
@@ -195,9 +172,7 @@ export const getLaunchStatusStyle = (status: LaunchStatusType) => {
   }
 };
 
-// Common Styles
 export const COMMON_STYLES = {
-  // Card styles
   card: {
     backgroundColor: COLORS.card,
     borderRadius: BORDER_RADIUS.md,
@@ -205,7 +180,6 @@ export const COMMON_STYLES = {
     ...SHADOWS.md,
   },
 
-  // Button styles
   button: {
     primary: {
       backgroundColor: COLORS.primary,
@@ -221,7 +195,6 @@ export const COMMON_STYLES = {
     },
   },
 
-  // Text styles
   text: {
     heading: {
       fontSize: TYPOGRAPHY.size.xl,

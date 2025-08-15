@@ -23,28 +23,20 @@ export const useImageOptimization = ({
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Optimize image URL for better performance
   const getOptimizedUrl = useCallback((url: string): string => {
-    // If it's already a small image, return as is
     if (url.includes('small')) return url;
 
-    // For SpaceX API images, prefer smaller versions for list items
     if (url.includes('large')) {
       return url.replace('/large/', '/small/');
     }
 
-    // For other images, try to get a smaller version if possible
-    // This is a generic approach that might work for some CDNs
     if (url.includes('?') || url.includes('&')) {
-      // URL already has parameters, add size parameter
       return `${url}&w=120&h=120&fit=crop`;
     } else {
-      // Add size parameters
       return `${url}?w=120&h=120&fit=crop`;
     }
   }, []);
 
-  // Preload image using React Native's Image.prefetch
   const preloadImage = useCallback(async (url: string): Promise<boolean> => {
     try {
       await Image.prefetch(url);
@@ -54,7 +46,6 @@ export const useImageOptimization = ({
     }
   }, []);
 
-  // Update optimized URL when imageUrl changes
   useEffect(() => {
     if (imageUrl) {
       const optimized = getOptimizedUrl(imageUrl);
@@ -63,13 +54,11 @@ export const useImageOptimization = ({
       setHasError(false);
       setIsLoaded(false);
 
-      // Preload the optimized image
       preloadImage(optimized).then((success) => {
         setIsLoading(false);
         if (success) {
           setIsLoaded(true);
         } else {
-          // If optimization fails, try original URL
           setOptimizedUrl(imageUrl);
           setIsLoaded(true);
         }

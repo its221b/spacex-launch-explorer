@@ -1,5 +1,3 @@
-// Environment configuration
-// This file loads environment variables and provides secure access to API keys
 import { GOOGLE_MAPS_API_KEY_ANDROID, API_BASE_URL } from '@env';
 
 interface EnvironmentConfig {
@@ -7,13 +5,11 @@ interface EnvironmentConfig {
   API_BASE_URL: string;
 }
 
-// Load environment variables
 const config: EnvironmentConfig = {
   GOOGLE_MAPS_API_KEY_ANDROID: GOOGLE_MAPS_API_KEY_ANDROID || '',
   API_BASE_URL: API_BASE_URL || 'https://api.spacexdata.com/v4',
 };
 
-// Validate required environment variables
 export const validateEnvironment = (): void => {
   const requiredVars = ['GOOGLE_MAPS_API_KEY_ANDROID'];
 
@@ -31,5 +27,4 @@ export const validateEnvironment = (): void => {
   }
 };
 
-// Export configuration
 export default config;

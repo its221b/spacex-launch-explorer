@@ -23,12 +23,10 @@ class Logger {
 
     this.logs.push(entry);
 
-    // Keep only the last maxLogs entries
     if (this.logs.length > this.maxLogs) {
       this.logs = this.logs.slice(-this.maxLogs);
     }
 
-    // Console logging for development
     if (__DEV__) {
       const prefix = `[${level.toUpperCase()}]`;
       switch (level) {
@@ -46,9 +44,7 @@ class Logger {
       }
     }
 
-    // In production, you could send logs to a service like Sentry, LogRocket, etc.
     if (!__DEV__ && level === 'error') {
-      // this.sendToErrorService(entry);
     }
   }
 
@@ -76,7 +72,6 @@ class Logger {
     this.logs = [];
   }
 
-  // Method to get logs for debugging purposes
   exportLogs(): string {
     return JSON.stringify(this.logs, null, 2);
   }
@@ -84,7 +79,6 @@ class Logger {
 
 export const logger = new Logger();
 
-// Convenience functions
 export const logDebug = (message: string, data?: any) => logger.debug(message, data);
 export const logInfo = (message: string, data?: any) => logger.info(message, data);
 export const logWarn = (message: string, data?: any) => logger.warn(message, data);

@@ -12,7 +12,6 @@ export type Launch = {
   details?: string | null;
   success?: boolean | null;
   links: LaunchLinks;
-  // SpaceX returns launchpad as ID string
   launchpad: string;
 };
 

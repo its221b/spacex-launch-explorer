@@ -40,7 +40,6 @@ export default function MapScreen() {
     );
   }, [location.coords, selectedLaunchpad]);
 
-  // If no launchpad is selected, show a message
   if (!selectedLaunchpadId) {
     return (
       <View style={{ flex: 1, paddingTop: insets.top, paddingBottom: insets.bottom }}>
@@ -103,7 +102,6 @@ export default function MapScreen() {
     });
   };
 
-  // If launchpad is selected but not loaded yet
   if (!selectedLaunchpad) {
     return (
       <View style={{ flex: 1, paddingTop: insets.top, paddingBottom: insets.bottom }}>
@@ -127,7 +125,6 @@ export default function MapScreen() {
           user={location.coords ?? undefined}
         />
 
-        {/* Launchpad Info Card */}
         <View style={styles.infoCard}>
           <View style={styles.launchpadHeader}>
             <Ionicons name="rocket" size={24} color={COLORS.primary} />
@@ -168,7 +165,6 @@ export default function MapScreen() {
           )}
         </View>
 
-        {/* Permission Denied Message */}
         {location.denied && !permissionRequested && (
           <View style={styles.permissionCard}>
             <View style={styles.permissionHeader}>
@@ -185,7 +181,6 @@ export default function MapScreen() {
           </View>
         )}
 
-        {/* Location Loading Message */}
         {location.loading && !location.coords && !location.denied && (
           <View style={styles.permissionCard}>
             <View style={styles.permissionHeader}>
@@ -198,7 +193,6 @@ export default function MapScreen() {
           </View>
         )}
 
-        {/* Navigation FAB */}
         <TouchableOpacity style={styles.fab} onPress={openDirections}>
           <Ionicons name="navigate" size={26} color={COLORS.white} />
         </TouchableOpacity>
@@ -248,14 +242,14 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.size.sm,
     color: COLORS.textSecondary,
     marginBottom: SPACING.sm,
-    marginLeft: 28, // Align with text after icon
+    marginLeft: 28,
   },
   distanceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.xs,
     marginBottom: SPACING.sm,
-    marginLeft: 28, // Align with text after icon
+    marginLeft: 28,
   },
   distanceText: {
     fontSize: TYPOGRAPHY.size.sm,
@@ -266,11 +260,11 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.size.sm,
     color: COLORS.textSecondary,
     lineHeight: TYPOGRAPHY.lineHeight.normal,
-    marginLeft: 28, // Align with text after icon
+    marginLeft: 28,
   },
   permissionCard: {
     position: 'absolute',
-    bottom: SPACING.xl + 160, // Above the FAB
+    bottom: SPACING.xl + 160,
     left: SPACING.md,
     right: SPACING.md,
     padding: SPACING.lg,
@@ -284,7 +278,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   permissionTitle: {
-    fontSize: TYPOGRAPHY.size.base,
+    fontSize: TYPOGRAPHY.size.sm,
     fontWeight: TYPOGRAPHY.weight.semibold,
     color: COLORS.error,
     marginLeft: SPACING.sm,

@@ -18,7 +18,7 @@ export const getLaunches = async (
     const params: any = {
       page,
       limit,
-      sort: { date_utc: 'desc' }, // Most recent first
+      sort: { date_utc: 'desc' },
     };
 
     if (search && search.trim()) {

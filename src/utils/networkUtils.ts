@@ -1,8 +1,3 @@
-/**
- * Generates user-friendly error messages based on Axios error codes
- * @param error - The Axios error object
- * @returns A user-friendly error message
- */
 export const getNetworkErrorMessage = (error: any): string => {
   if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
     return 'Request timed out. Please check your connection and try again.';

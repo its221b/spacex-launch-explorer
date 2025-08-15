@@ -17,14 +17,12 @@ export default function BottomTabs() {
 
   useEffect(() => {
     if (selectedLaunchpadId) {
-      // Force switch to Map tab by changing the key
       setTabKey('map');
     }
   }, [selectedLaunchpadId]);
 
   const handleTabPress = (tabName: 'Launches' | 'Map') => {
     if (tabName === 'Launches') {
-      // Clear selected launchpad when user goes back to Launches tab
       clearSelectedLaunchpadId();
       setTabKey('launches');
     }

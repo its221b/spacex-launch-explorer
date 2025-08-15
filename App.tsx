@@ -7,7 +7,6 @@ import { validateEnvironment } from './src/config/env';
 
 export default function App() {
   useEffect(() => {
-    // Validate environment variables on app startup
     validateEnvironment();
   }, []);
 

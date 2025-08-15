@@ -14,17 +14,14 @@ export default function useLocation() {
       setLoading(true);
       setError(null);
 
-      // Check current permission status
       const { status: existingStatus } = await Location.getForegroundPermissionsAsync();
 
       if (existingStatus === 'granted') {
-        // Permission already granted, get location
         await getCurrentLocation();
         return;
       }
 
       if (existingStatus === 'denied') {
-        // Permission denied, request it
         const { status } = await Location.requestForegroundPermissionsAsync();
 
         if (status === 'granted') {
@@ -36,7 +33,6 @@ export default function useLocation() {
       }
 
       if (existingStatus === 'undetermined') {
-        // Permission not determined yet, request it
         const { status } = await Location.requestForegroundPermissionsAsync();
 
         if (status === 'granted') {

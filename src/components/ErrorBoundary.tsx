@@ -29,7 +29,6 @@ export default class ErrorBoundary extends Component<Props, State> {
       errorInfo,
     });
 
-    // Log error to console in development
     if (__DEV__) {
       console.error('ErrorBoundary caught an error:', error, errorInfo);
     }

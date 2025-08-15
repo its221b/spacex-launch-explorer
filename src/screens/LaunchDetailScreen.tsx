@@ -95,14 +95,12 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
         contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}
       >
-        {/* Mission Patch */}
         {launch.links?.patch?.large && (
           <View style={styles.patchContainer}>
             <Image source={{ uri: launch.links.patch.large }} style={styles.patch} />
           </View>
         )}
 
-        {/* Launch Info */}
         <View style={styles.infoContainer}>
           <Text style={styles.title}>{launch.name}</Text>
 
@@ -121,14 +119,12 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
             </Text>
           </View>
 
-          {/* Status Badge */}
           <View style={[styles.statusBadge, statusStyle]}>
             <Text style={[styles.statusText, { color: statusStyle.color }]}>
               {status.charAt(0).toUpperCase() + status.slice(1)}
             </Text>
           </View>
 
-          {/* Mission Details */}
           {launch.details && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Mission Details</Text>
@@ -136,7 +132,6 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
             </View>
           )}
 
-          {/* Launchpad Information */}
           {launchpad && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Launchpad Information</Text>
@@ -170,7 +165,6 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
             </View>
           )}
 
-          {/* Action Buttons */}
           <View style={styles.buttonContainer}>
             {launch.links?.wikipedia && (
               <TouchableOpacity

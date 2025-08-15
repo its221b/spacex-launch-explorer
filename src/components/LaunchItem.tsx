@@ -22,7 +22,6 @@ export default function LaunchItem({ launch }: Props) {
   const status = getLaunchStatus(launch);
   const statusStyle = getLaunchStatusStyle(status);
 
-  // Use the image optimization hook
   const { optimizedUrl, isLoading, hasError, isLoaded, retry } = useImageOptimization({
     imageUrl: launch.links?.patch?.small || launch.links?.patch?.large || null,
   });
@@ -32,15 +31,12 @@ export default function LaunchItem({ launch }: Props) {
   };
 
   const handleImageLoadStart = useCallback(() => {
-    // This will be handled by the hook
   }, []);
 
   const handleImageLoadEnd = useCallback(() => {
-    // This will be handled by the hook
   }, []);
 
   const handleImageError = useCallback(() => {
-    // This will be handled by the hook
   }, []);
 
   return (
@@ -52,27 +48,25 @@ export default function LaunchItem({ launch }: Props) {
               <Image
                 source={{
                   uri: optimizedUrl,
-                  cache: 'force-cache', // Force cache for better performance
+                  cache: 'force-cache',
                 }}
                 style={[
                   styles.image,
-                  { opacity: isLoaded ? 1 : 0.3 }, // Fade in effect
+                  { opacity: isLoaded ? 1 : 0.3 },
                 ]}
                 onLoadStart={handleImageLoadStart}
                 onLoadEnd={handleImageLoadEnd}
                 onError={handleImageError}
-                fadeDuration={300} // Smooth fade-in
+                fadeDuration={300}
                 resizeMode="contain"
               />
 
-              {/* Loading Overlay */}
               {isLoading && !isLoaded && (
                 <View style={styles.loadingOverlay}>
                   <ActivityIndicator size="small" color={COLORS.primary} />
                 </View>
               )}
 
-              {/* Error State with Retry */}
               {hasError && (
                 <TouchableOpacity style={styles.errorOverlay} onPress={retry}>
                   <Text style={styles.errorText}>🚀</Text>

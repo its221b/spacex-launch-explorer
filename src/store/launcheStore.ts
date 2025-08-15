@@ -34,7 +34,6 @@ type Actions = {
 };
 
 export const useLaunchStore = create<State & Actions>((set, get) => {
-  // Helper function to ensure unique launches
   const ensureUniqueLaunches = (launches: Launch[]): Launch[] => {
     const seen = new Set();
     return launches.filter((launch) => {
@@ -88,7 +87,6 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
             error: `Failed to fetch launches. Retrying... (${newRetryCount}/${maxRetries})`,
           });
 
-          // Auto-retry after 2 seconds
           setTimeout(() => {
             get().initLaunches();
           }, 2000);
@@ -114,7 +112,6 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
         const nextPage = currentPage + 1;
         const data = await getLaunches(nextPage, 10, searchQuery);
 
-        // Prevent duplicate launches by checking IDs
         const existingIds = new Set(get().launches.map((launch) => launch.id));
         const newLaunches = data.docs.filter((launch) => !existingIds.has(launch.id));
 
@@ -130,7 +127,6 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
             `Loaded more launches: page ${nextPage}, added ${newLaunches.length} new launches`,
           );
         } else {
-          // No new launches, mark as no more pages
           set({ hasNextPage: false, loadingMore: false });
           logInfo('No more launches to load');
         }
