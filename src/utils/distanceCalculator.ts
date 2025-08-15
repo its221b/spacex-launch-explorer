@@ -13,12 +13,15 @@ export const haversineKm = (lat1: number, lon1: number, lat2: number, lon2: numb
   return EARTH_RADIUS_KM * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-export const formatDistance = (distance: number): string => {
+export const formatDistanceWithPlural = (distance: number): string => {
   if (distance < 1) {
-    return `${Math.round(distance * 1000)}m`;
+    const meters = Math.round(distance * 1000);
+    return `${meters} ${meters === 1 ? 'm' : 'ms'}`;
   } else if (distance < 100) {
-    return `${distance.toFixed(1)}km`;
+    const km = distance.toFixed(1);
+    return `${km} ${distance === 1 ? 'km' : 'kms'}`;
   } else {
-    return `${Math.round(distance)}km`;
+    const km = Math.round(distance);
+    return `${km} ${km === 1 ? 'km' : 'kms'}`;
   }
 };

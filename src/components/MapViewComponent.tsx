@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useCallback } from 'react';
 import { Platform, StyleSheet, Text, View, TouchableOpacity, Linking, Alert } from 'react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../utils/constants';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,6 +28,7 @@ export default function MapViewComponent({
   user?: { latitude: number; longitude: number };
 }) {
   const mapRef = useRef<any>(null);
+  const lastRegionRef = useRef<any>(null);
 
   const mapProvider = Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined;
 
@@ -58,19 +59,40 @@ export default function MapViewComponent({
     }
   }, [launchpad, user]);
 
-  useEffect(() => {
-    if (mapRef.current && user) {
-      const coordinates = [
-        { latitude: launchpad.latitude, longitude: launchpad.longitude },
-        { latitude: user.latitude, longitude: user.longitude },
-      ];
+  const shouldUpdateRegion = useCallback((newRegion: any) => {
+    if (!lastRegionRef.current) return true;
 
-      mapRef.current.fitToCoordinates(coordinates, {
-        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-        animated: true,
-      });
+    const current = lastRegionRef.current;
+    const latDiff = Math.abs(newRegion.latitude - current.latitude);
+    const lngDiff = Math.abs(newRegion.longitude - current.longitude);
+    const latDeltaDiff = Math.abs(newRegion.latitudeDelta - current.latitudeDelta);
+    const lngDeltaDiff = Math.abs(newRegion.longitudeDelta - current.longitudeDelta);
+
+    return latDiff > 0.001 || lngDiff > 0.001 || latDeltaDiff > 0.001 || lngDeltaDiff > 0.001;
+  }, []);
+
+  useEffect(() => {
+    if (mapRef.current && shouldUpdateRegion(region)) {
+      if (user) {
+        const coordinates = [
+          { latitude: launchpad.latitude, longitude: launchpad.longitude },
+          { latitude: user.latitude, longitude: user.longitude },
+        ];
+
+        mapRef.current.fitToCoordinates(coordinates, {
+          edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+          animated: true,
+        });
+      } else {
+        mapRef.current.animateToRegion(region, 1000);
+      }
+      lastRegionRef.current = region;
     }
-  }, [launchpad, user]);
+  }, [launchpad, user, region, shouldUpdateRegion]);
+
+  const handleRegionChangeComplete = useCallback((newRegion: any) => {
+    lastRegionRef.current = newRegion;
+  }, []);
 
   if (!MapView || !Marker) {
     return (
@@ -138,14 +160,26 @@ export default function MapViewComponent({
         showsIndoors={true}
         followsUserLocation={false}
         userLocationPriority="high"
-        userLocationUpdateInterval={5000}
-        userLocationFastestInterval={2000}
+        userLocationUpdateInterval={10000}
+        userLocationFastestInterval={5000}
+        onRegionChangeComplete={handleRegionChangeComplete}
+        scrollEnabled={true}
+        zoomEnabled={true}
+        rotateEnabled={true}
+        pitchEnabled={true}
+        moveOnMarkerPress={false}
+        tracksViewChanges={false}
+        liteMode={false}
+        animationEnabled={true}
+        toolbarEnabled={false}
+        keepAlive={true}
       >
         <Marker
           coordinate={{ latitude: launchpad.latitude, longitude: launchpad.longitude }}
           title={launchpad.title || 'Launchpad'}
           description="SpaceX Launch Site"
           pinColor="red"
+          tracksViewChanges={false}
         />
 
         <Marker
@@ -195,7 +229,6 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-
   markerLabel: {
     backgroundColor: COLORS.map.launchpad,
     paddingHorizontal: SPACING.sm,

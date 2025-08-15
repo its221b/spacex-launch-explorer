@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,10 +10,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { useLaunchStore } from '../store/launcheStore';
 import MapViewComponent from '../components/MapViewComponent';
 import useLocation from '../hooks/useLocation';
-import { haversineKm } from '../utils/distanceCalculator';
+import { haversineKm, formatDistanceWithPlural } from '../utils/distanceCalculator';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../utils/constants';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -28,6 +29,25 @@ export default function MapScreen() {
     }
   }, [selectedLaunchpadId, fetchLaunchpadById]);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      let isMounted = true;
+
+      const refreshPermissions = async () => {
+        if (isMounted) {
+          await location.forceRefreshPermissions();
+        }
+      };
+
+      const timeoutId = setTimeout(refreshPermissions, 1000);
+
+      return () => {
+        isMounted = false;
+        clearTimeout(timeoutId);
+      };
+    }, [location]),
+  );
+
   const distance = useMemo(() => {
     if (!location.coords || !selectedLaunchpad) return null;
     return haversineKm(
@@ -38,21 +58,12 @@ export default function MapScreen() {
     );
   }, [location.coords, selectedLaunchpad]);
 
-  if (!selectedLaunchpadId) {
-    return (
-      <View style={{ flex: 1, paddingTop: insets.top, paddingBottom: insets.bottom }}>
-        <View style={styles.center}>
-          <Ionicons name="map" size={64} color={COLORS.textSecondary} />
-          <Text style={styles.loadingText}>Welcome to Launchpad Map</Text>
-          <Text style={styles.instructionText}>
-            Select a launch from the Launches tab to view its location on the map.
-          </Text>
-        </View>
-      </View>
-    );
-  }
+  const formattedDistance = useMemo(() => {
+    if (!distance) return null;
+    return formatDistanceWithPlural(distance);
+  }, [distance]);
 
-  const openDirections = () => {
+  const openDirections = useCallback(() => {
     if (!selectedLaunchpad) return;
 
     const { latitude, longitude, name } = selectedLaunchpad;
@@ -73,7 +84,39 @@ export default function MapScreen() {
         [{ text: 'OK' }],
       );
     });
-  };
+  }, [selectedLaunchpad]);
+
+  const launchpadData = useMemo(() => {
+    if (!selectedLaunchpad) return null;
+
+    return {
+      latitude: selectedLaunchpad.latitude,
+      longitude: selectedLaunchpad.longitude,
+      title: selectedLaunchpad.name,
+    };
+  }, [selectedLaunchpad]);
+
+  const handleRetryPermission = useCallback(async () => {
+    try {
+      await location.requestLocationPermission();
+    } catch {
+      location.openSettings();
+    }
+  }, [location]);
+
+  if (!selectedLaunchpadId) {
+    return (
+      <View style={{ flex: 1, paddingTop: insets.top, paddingBottom: insets.bottom }}>
+        <View style={styles.center}>
+          <Ionicons name="map" size={64} color={COLORS.textSecondary} />
+          <Text style={styles.loadingText}>Welcome to Launchpad Map</Text>
+          <Text style={styles.instructionText}>
+            Select a launch from the Launches tab to view its location on the map.
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   if (!selectedLaunchpad) {
     return (
@@ -92,14 +135,7 @@ export default function MapScreen() {
   return (
     <View style={{ flex: 1, paddingTop: insets.top, paddingBottom: insets.bottom }}>
       <View style={styles.container}>
-        <MapViewComponent
-          launchpad={{
-            latitude: selectedLaunchpad.latitude,
-            longitude: selectedLaunchpad.longitude,
-            title: selectedLaunchpad.name,
-          }}
-          user={location.coords ?? undefined}
-        />
+        <MapViewComponent launchpad={launchpadData!} user={location.coords ?? undefined} />
 
         <View style={styles.infoCard}>
           <View style={styles.launchpadHeader}>
@@ -115,14 +151,16 @@ export default function MapScreen() {
             </Text>
           )}
 
-          {distance && (
+          {formattedDistance && (
             <View style={styles.distanceContainer}>
               <Ionicons name="location" size={16} color={COLORS.primary} />
-              <Text style={styles.distanceText}>{distance.toFixed(2)} km away</Text>
+              <Text style={styles.distanceText}>
+                {formattedDistance} from your current location
+              </Text>
             </View>
           )}
 
-          {!distance && location.coords && (
+          {!formattedDistance && location.permissionStatus === 'granted' && location.loading && (
             <View style={styles.distanceContainer}>
               <Ionicons name="location" size={16} color={COLORS.textSecondary} />
               <Text style={[styles.distanceText, { color: COLORS.textSecondary }]}>
@@ -131,7 +169,19 @@ export default function MapScreen() {
             </View>
           )}
 
-          {!location.coords && !location.loading && (
+          {!formattedDistance &&
+            location.permissionStatus === 'granted' &&
+            !location.coords &&
+            !location.loading && (
+              <View style={styles.distanceContainer}>
+                <Ionicons name="location" size={16} color={COLORS.textSecondary} />
+                <Text style={[styles.distanceText, { color: COLORS.textSecondary }]}>
+                  Location not available
+                </Text>
+              </View>
+            )}
+
+          {location.permissionStatus !== 'granted' && (
             <View style={styles.distanceContainer}>
               <Ionicons name="location" size={16} color={COLORS.textSecondary} />
               <Text style={[styles.distanceText, { color: COLORS.textSecondary }]}>
@@ -140,6 +190,109 @@ export default function MapScreen() {
             </View>
           )}
         </View>
+
+        {location.permissionStatus === 'undetermined' && (
+          <View style={styles.permissionCardCentered}>
+            <View style={styles.permissionHeader}>
+              <Ionicons name="location" size={20} color={COLORS.primary} />
+              <Text style={styles.permissionTitle}>Enable Location Access</Text>
+            </View>
+            <Text style={styles.permissionText}>
+              This app needs location access to show your position on the map and calculate distance
+              to SpaceX launchpads. Please grant location permission to use all map features.
+            </Text>
+            <TouchableOpacity
+              style={styles.permissionButton}
+              onPress={location.requestLocationPermission}
+            >
+              <Text style={styles.permissionButtonText}>Grant Permission</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {location.permissionStatus === 'denied' && (
+          <View style={styles.permissionCardCentered}>
+            <View style={styles.permissionHeader}>
+              <Ionicons name="location" size={20} color={COLORS.error} />
+              <Text style={styles.permissionTitle}>Location Access Required</Text>
+            </View>
+            <Text style={styles.permissionText}>
+              This app needs location access to show your position on the map and calculate distance
+              to launchpads. Without location access, you won't be able to see how far you are from
+              SpaceX launch sites.
+            </Text>
+            <View style={styles.permissionButtonContainer}>
+              <TouchableOpacity style={styles.permissionButton} onPress={handleRetryPermission}>
+                <Text style={styles.permissionButtonText}>Try Again</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.permissionButton, styles.settingsButton]}
+                onPress={location.openSettings}
+              >
+                <Text style={styles.permissionButtonText}>Open Settings</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {location.permissionStatus === 'blocked' && (
+          <View style={styles.permissionCardCentered}>
+            <View style={styles.permissionHeader}>
+              <Ionicons name="location" size={20} color={COLORS.warning} />
+              <Text style={styles.permissionTitle}>Location Access Blocked</Text>
+            </View>
+            <Text style={styles.permissionText}>
+              Location access is blocked on your device. You need to enable location permissions in
+              your device settings to use map features and see your distance to launchpads.
+            </Text>
+            <View style={styles.permissionButtonContainer}>
+              <TouchableOpacity style={styles.permissionButton} onPress={handleRetryPermission}>
+                <Text style={styles.permissionButtonText}>Try Again</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.permissionButton, styles.settingsButton]}
+                onPress={location.openSettings}
+              >
+                <Text style={styles.permissionButtonText}>Open Settings</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {location.permissionStatus === 'granted' && location.loading && !location.coords && (
+          <View style={styles.permissionCardCentered}>
+            <View style={styles.permissionHeader}>
+              <ActivityIndicator size="small" color={COLORS.primary} />
+              <Text style={styles.permissionTitle}>Getting Your Location</Text>
+            </View>
+            <Text style={styles.permissionText}>
+              Please wait while we determine your current location...
+            </Text>
+          </View>
+        )}
+
+        {location.permissionStatus === 'granted' && location.error && !location.coords && (
+          <View style={styles.permissionCardCentered}>
+            <View style={styles.permissionHeader}>
+              <Ionicons name="location" size={20} color={COLORS.warning} />
+              <Text style={styles.permissionTitle}>Location Error</Text>
+            </View>
+            <Text style={styles.permissionText}>
+              {location.error}. Please try again or check your location settings.
+            </Text>
+            <View style={styles.permissionButtonContainer}>
+              <TouchableOpacity style={styles.permissionButton} onPress={location.refreshLocation}>
+                <Text style={styles.permissionButtonText}>Try Again</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.permissionButton, styles.settingsButton]}
+                onPress={location.openSettings}
+              >
+                <Text style={styles.permissionButtonText}>Open Settings</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         <TouchableOpacity style={styles.fab} onPress={openDirections}>
           <Ionicons name="navigate" size={26} color={COLORS.white} />
@@ -203,18 +356,6 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
     marginLeft: SPACING.xl,
   },
-  distanceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    marginBottom: SPACING.sm,
-    marginLeft: SPACING.xl,
-  },
-  distanceText: {
-    fontSize: TYPOGRAPHY.size.sm,
-    color: COLORS.primary,
-    fontWeight: TYPOGRAPHY.weight.medium,
-  },
   fab: {
     position: 'absolute',
     bottom: SPACING.xl + 80,
@@ -223,5 +364,72 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.md,
     ...SHADOWS.lg,
+  },
+  distanceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: SPACING.sm,
+    marginLeft: SPACING.xl,
+  },
+  distanceText: {
+    marginLeft: SPACING.sm,
+    fontSize: TYPOGRAPHY.size.sm,
+    color: COLORS.primary,
+  },
+  permissionCardCentered: {
+    position: 'absolute',
+    top: '50%',
+    left: SPACING.lg,
+    right: SPACING.lg,
+    padding: SPACING.lg,
+    backgroundColor: COLORS.card,
+    borderRadius: BORDER_RADIUS.md,
+    ...SHADOWS.md,
+    marginTop: SPACING.md,
+    alignItems: 'center',
+    transform: [{ translateY: -100 }],
+  },
+  permissionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
+  permissionTitle: {
+    fontSize: TYPOGRAPHY.size.lg,
+    fontWeight: TYPOGRAPHY.weight.semibold,
+    marginLeft: SPACING.sm,
+    color: COLORS.textPrimary,
+  },
+  permissionText: {
+    fontSize: TYPOGRAPHY.size.sm,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.sm,
+    textAlign: 'center',
+  },
+  permissionButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: BORDER_RADIUS.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.sm,
+    alignItems: 'center',
+    marginTop: SPACING.sm,
+    minWidth: 80,
+    flex: 1,
+  },
+  permissionButtonText: {
+    color: COLORS.white,
+    fontSize: TYPOGRAPHY.size.sm,
+    fontWeight: TYPOGRAPHY.weight.semibold,
+    textAlign: 'center',
+  },
+  permissionButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: SPACING.sm,
+    width: '100%',
+    gap: SPACING.xs,
+  },
+  settingsButton: {
+    backgroundColor: COLORS.secondary,
   },
 });
