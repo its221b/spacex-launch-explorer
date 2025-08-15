@@ -1,7 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, COMMON_STYLES } from '../utils/constants';
+import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from '../utils/constants';
 
 interface Props {
   children: ReactNode;
@@ -49,10 +49,7 @@ export default class ErrorBoundary extends Component<Props, State> {
             The app encountered an unexpected error. This might be a temporary issue.
           </Text>
 
-          <TouchableOpacity
-            style={[styles.retryButton, COMMON_STYLES.button.primary]}
-            onPress={this.handleRetry}
-          >
+          <TouchableOpacity style={styles.retryButton} onPress={this.handleRetry}>
             <Text style={styles.retryButtonText}>Try Again</Text>
           </TouchableOpacity>
 
@@ -89,17 +86,21 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.weight.semibold,
     color: COLORS.textPrimary,
     marginBottom: SPACING.sm,
-    textAlign: 'center',
   },
   message: {
     fontSize: TYPOGRAPHY.size.base,
     color: COLORS.textSecondary,
     marginBottom: SPACING['2xl'],
     textAlign: 'center',
-    lineHeight: TYPOGRAPHY.size.base * TYPOGRAPHY.lineHeight.normal,
   },
   retryButton: {
     marginBottom: SPACING['2xl'],
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   retryButtonText: {
     color: COLORS.white,

@@ -5,6 +5,7 @@ import { logError, logInfo, logWarn } from '../utils/logger';
 
 type State = {
   launches: Launch[];
+  originalLaunches: Launch[];
   hasNextPage: boolean;
   loading: boolean;
   loadingMore: boolean;
@@ -47,8 +48,9 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
 
   return {
     launches: [],
+    originalLaunches: [],
     hasNextPage: false,
-    loading: false,
+    loading: true,
     loadingMore: false,
     refreshing: false,
     error: null,
@@ -61,7 +63,11 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
     selectedLaunchpadId: null,
 
     initLaunches: async () => {
-      if (get().launches.length > 0) return;
+      const currentLaunches = get().launches;
+      const currentSearchQuery = get().searchQuery;
+
+      if (currentLaunches.length > 0 && !currentSearchQuery && get().hasNextPage !== false) return;
+
       set({ loading: true, error: null, currentPage: 1 });
       try {
         logInfo('Initializing launches');
@@ -69,12 +75,13 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
         const uniqueLaunches = ensureUniqueLaunches(data.docs);
         set({
           launches: uniqueLaunches,
+          originalLaunches: uniqueLaunches,
           hasNextPage: data.hasNextPage,
           loading: false,
           retryCount: 0,
           currentPage: 1,
         });
-        logInfo(`Loaded ${uniqueLaunches.length} launches`);
+        logInfo(`Loaded ${uniqueLaunches.length} launches, hasNextPage: ${data.hasNextPage}`);
       } catch (error: any) {
         const { retryCount, maxRetries } = get();
         const newRetryCount = retryCount + 1;
@@ -104,13 +111,16 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
     },
 
     loadMore: async () => {
-      const { searchQuery, loadingMore, hasNextPage, currentPage } = get();
-      if (loadingMore || !hasNextPage) return;
+      const { loadingMore, hasNextPage, currentPage, searchQuery } = get();
+
+      if (loadingMore || !hasNextPage || searchQuery.trim()) {
+        return;
+      }
 
       set({ loadingMore: true });
       try {
         const nextPage = currentPage + 1;
-        const data = await getLaunches(nextPage, 10, searchQuery);
+        const data = await getLaunches(nextPage, 10);
 
         const existingIds = new Set(get().launches.map((launch) => launch.id));
         const newLaunches = data.docs.filter((launch) => !existingIds.has(launch.id));
@@ -118,6 +128,7 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
         if (newLaunches.length > 0) {
           set((state) => ({
             launches: ensureUniqueLaunches([...state.launches, ...newLaunches]),
+            originalLaunches: ensureUniqueLaunches([...state.originalLaunches, ...newLaunches]),
             hasNextPage: data.hasNextPage,
             loadingMore: false,
             currentPage: nextPage,
@@ -128,7 +139,7 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
           );
         } else {
           set({ hasNextPage: false, loadingMore: false });
-          logInfo('No more launches to load');
+          logInfo('No more launches to load - reached end of data');
         }
       } catch (error: any) {
         logError('Failed to load more launches', error as Error);
@@ -137,31 +148,60 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
     },
 
     searchLaunches: async (query: string) => {
+      const originalLaunches = get().originalLaunches;
+      const currentSearchQuery = get().searchQuery;
+      const searchTerm = query.toLowerCase().trim();
+
+      if (currentSearchQuery === query) {
+        return;
+      }
+
+      if (!searchTerm) {
+        set({
+          launches: originalLaunches,
+          searchQuery: '',
+          currentPage: 1,
+          loading: false,
+          error: null,
+          hasNextPage: get().hasNextPage,
+        });
+        return;
+      }
+
       set({ loading: true, error: null, searchQuery: query, currentPage: 1 });
+
       try {
-        logInfo(`Searching launches for: "${query}"`);
-        const data = await getLaunches(1, 10, query);
-        const uniqueLaunches = ensureUniqueLaunches(data.docs);
+        const filteredLaunches = originalLaunches.filter((launch) =>
+          launch.name.toLowerCase().includes(searchTerm),
+        );
 
         set({
-          launches: uniqueLaunches,
-          hasNextPage: data.hasNextPage,
+          launches: filteredLaunches,
+          hasNextPage: false,
           loading: false,
           retryCount: 0,
           currentPage: 1,
         });
 
-        logInfo(`Search results: ${uniqueLaunches.length} launches found`);
+        logInfo(`Local search results: ${filteredLaunches.length} launches found for "${query}"`);
       } catch (error: any) {
-        const errorMessage = 'Failed to search launches. Please try again.';
+        const errorMessage = 'Search failed. Please try again.';
         logError(errorMessage, error as Error);
         set({ error: errorMessage, loading: false });
       }
     },
 
     clearSearch: async () => {
-      set({ searchQuery: '', currentPage: 1 });
-      await get().initLaunches();
+      const originalLaunches = get().originalLaunches;
+
+      set({
+        launches: originalLaunches,
+        searchQuery: '',
+        currentPage: 1,
+        loading: false,
+        error: null,
+        hasNextPage: get().hasNextPage,
+      });
     },
 
     retryLaunches: async () => {
@@ -170,11 +210,10 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
     },
 
     refreshLaunches: async () => {
-      const { searchQuery } = get();
       set({ refreshing: true, error: null, retryCount: 0, currentPage: 1 });
       try {
         logInfo('Refreshing launches');
-        const data = await getLaunches(1, 10, searchQuery);
+        const data = await getLaunches(1, 10);
         const uniqueLaunches = ensureUniqueLaunches(data.docs);
         set({
           launches: uniqueLaunches,
@@ -213,7 +252,7 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
     },
 
     setSelectedLaunchpadId: (id) => set({ selectedLaunchpadId: id }),
-    clearSelectedLaunchpadId: () => set({ selectedLaunchpadId: null }),
+    clearSelectedLaunchpadId: () => set({ selectedLaunchpadId: null, selectedLaunchpad: null }),
     clearError: () => set({ error: null, retryCount: 0 }),
   };
 });

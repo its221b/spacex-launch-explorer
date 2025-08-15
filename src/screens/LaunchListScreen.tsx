@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   View,
   AppState,
+  Text,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import EmptyState from '../components/EmptyState';
@@ -27,7 +28,6 @@ export default function LaunchListScreen() {
     refreshing,
     error,
     retryCount,
-    searchQuery,
     initLaunches,
     loadMore,
     refreshLaunches,
@@ -37,6 +37,7 @@ export default function LaunchListScreen() {
   } = useLaunchStore();
 
   const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const previousSearchRef = useRef('');
 
   useEffect(() => {
     const handleAppStateChange = (nextAppState: string) => {
@@ -49,15 +50,13 @@ export default function LaunchListScreen() {
 
     const subscription = AppState.addEventListener('change', handleAppStateChange);
 
-    const timer = setTimeout(() => {
-      initLaunches();
-    }, 1500);
+    initLaunches();
 
     return () => {
-      clearTimeout(timer);
       subscription?.remove();
     };
-  }, [initLaunches]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (launches.length > 0) {
@@ -73,17 +72,20 @@ export default function LaunchListScreen() {
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (localSearchQuery !== searchQuery) {
+      if (localSearchQuery !== previousSearchRef.current) {
+        previousSearchRef.current = localSearchQuery;
+
         if (localSearchQuery.trim()) {
           searchLaunches(localSearchQuery);
         } else {
           clearSearch();
         }
       }
-    }, 500);
+    }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [localSearchQuery, searchQuery, searchLaunches, clearSearch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localSearchQuery]);
 
   const renderLaunchItem = useCallback(
     ({ item }: { item: any }) => <LaunchItem launch={item} />,
@@ -95,17 +97,27 @@ export default function LaunchListScreen() {
   }, []);
 
   const renderFooter = () => {
-    if (!loadingMore) return null;
+    if (loadingMore) {
+      return (
+        <View style={styles.footerLoader}>
+          <ActivityIndicator size="small" color={COLORS.primary} />
+        </View>
+      );
+    }
 
-    return (
-      <View style={styles.footerLoader}>
-        <ActivityIndicator size="small" color={COLORS.primary} />
-      </View>
-    );
+    if (!hasNextPage && launches.length > 0) {
+      return (
+        <View style={styles.footerLoader}>
+          <Text style={styles.noMoreText}>No more launches</Text>
+        </View>
+      );
+    }
+
+    return null;
   };
 
   const renderEmptyComponent = () => {
-    if (loading) return null;
+    if (loading || refreshing) return null;
 
     if (error) {
       return (
@@ -128,13 +140,17 @@ export default function LaunchListScreen() {
       );
     }
 
-    return (
-      <EmptyState
-        icon="rocket-outline"
-        title="No launches available"
-        subtitle="There are currently no launches to display. Check back later!"
-      />
-    );
+    if (launches.length === 0 && !loading && !refreshing) {
+      return (
+        <EmptyState
+          icon="rocket-outline"
+          title="No launches available"
+          subtitle="There are currently no launches to display. Check back later!"
+        />
+      );
+    }
+
+    return null;
   };
 
   const handleLoadMore = useCallback(() => {
@@ -148,7 +164,22 @@ export default function LaunchListScreen() {
   }, [refreshLaunches]);
 
   if (loading && launches.length === 0) {
-    return <Loading />;
+    return (
+      <View style={{ flex: 1, backgroundColor: COLORS.background, paddingTop: insets.top }}>
+        <View style={styles.container}>
+          <SearchBar
+            value={localSearchQuery}
+            onChangeText={setLocalSearchQuery}
+            placeholder="Search launches..."
+            onClear={() => {
+              setLocalSearchQuery('');
+              clearSearch();
+            }}
+          />
+          <Loading />
+        </View>
+      </View>
+    );
   }
 
   return (
@@ -170,7 +201,7 @@ export default function LaunchListScreen() {
           keyExtractor={keyExtractor}
           contentContainerStyle={styles.listContainer}
           onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.1}
+          onEndReachedThreshold={0.5}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -219,5 +250,9 @@ const styles = StyleSheet.create({
   separator: {
     height: SPACING.md,
     backgroundColor: COLORS.background,
+  },
+  noMoreText: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
   },
 });

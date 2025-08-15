@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, COMMON_STYLES } from '../utils/constants';
+import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from '../utils/constants';
 
 type Props = {
   title?: string;
@@ -24,10 +24,7 @@ export default function ErrorState({
       <Text style={styles.message}>{message}</Text>
 
       {showRetry && onRetry && (
-        <TouchableOpacity
-          style={[styles.retryButton, COMMON_STYLES.button.primary]}
-          onPress={onRetry}
-        >
+        <TouchableOpacity style={[styles.retryButton, styles.buttonPrimary]} onPress={onRetry}>
           <Text style={styles.retryButtonText}>Try Again</Text>
         </TouchableOpacity>
       )}
@@ -74,6 +71,12 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: TYPOGRAPHY.size.base,
     fontWeight: TYPOGRAPHY.weight.semibold,
+  },
+  buttonPrimary: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING['2xl'],
+    borderRadius: BORDER_RADIUS.md,
   },
   troubleshooting: {
     backgroundColor: COLORS.surface,

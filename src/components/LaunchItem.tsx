@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Launch } from '../api/types';
@@ -30,15 +30,6 @@ export default function LaunchItem({ launch }: Props) {
     navigation.navigate('LaunchDetail', { id: launch.id });
   };
 
-  const handleImageLoadStart = useCallback(() => {
-  }, []);
-
-  const handleImageLoadEnd = useCallback(() => {
-  }, []);
-
-  const handleImageError = useCallback(() => {
-  }, []);
-
   return (
     <TouchableOpacity style={styles.container} onPress={handlePress} activeOpacity={0.7}>
       <View style={styles.content}>
@@ -50,13 +41,10 @@ export default function LaunchItem({ launch }: Props) {
                   uri: optimizedUrl,
                   cache: 'force-cache',
                 }}
-                style={[
-                  styles.image,
-                  { opacity: isLoaded ? 1 : 0.3 },
-                ]}
-                onLoadStart={handleImageLoadStart}
-                onLoadEnd={handleImageLoadEnd}
-                onError={handleImageError}
+                style={[styles.image, { opacity: isLoaded ? 1 : 0.3 }]}
+                onLoadStart={() => {}}
+                onLoadEnd={() => {}}
+                onError={() => {}}
                 fadeDuration={300}
                 resizeMode="contain"
               />

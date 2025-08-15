@@ -1,3 +1,5 @@
+import { Image } from 'react-native';
+
 class ImagePreloader {
   private preloadedImages: Set<string> = new Set();
   private preloadQueue: string[] = [];
@@ -10,16 +12,10 @@ class ImagePreloader {
         return;
       }
 
-      import('react-native')
-        .then(({ Image }) => {
-          Image.prefetch(url)
-            .then(() => {
-              this.preloadedImages.add(url);
-              resolve(true);
-            })
-            .catch(() => {
-              resolve(false);
-            });
+      Image.prefetch(url)
+        .then(() => {
+          this.preloadedImages.add(url);
+          resolve(true);
         })
         .catch(() => {
           resolve(false);

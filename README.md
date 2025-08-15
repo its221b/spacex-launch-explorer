@@ -15,6 +15,7 @@ SpaceX Launch Explorer is a comprehensive mobile app that provides space enthusi
 ## ✨ Key Features
 
 ### 🚀 Launch Management
+
 - **Browse all SpaceX launches** with infinite scroll pagination
 - **Search and filter** launches by name or mission details
 - **Launch details** with comprehensive mission information
@@ -22,6 +23,7 @@ SpaceX Launch Explorer is a comprehensive mobile app that provides space enthusi
 - **Launch status tracking** (upcoming, successful, failed)
 
 ### 🗺️ Interactive Maps
+
 - **Google Maps integration** for Android devices
 - **Apple Maps integration** for iOS devices
 - **Launchpad markers** with detailed information
@@ -30,6 +32,7 @@ SpaceX Launch Explorer is a comprehensive mobile app that provides space enthusi
 - **Navigation integration** to open external map apps
 
 ### 🎨 Modern UI/UX
+
 - **Professional design system** with consistent styling
 - **Smooth animations** and transitions
 - **Responsive layout** for all screen sizes
@@ -38,6 +41,7 @@ SpaceX Launch Explorer is a comprehensive mobile app that provides space enthusi
 - **Pull-to-refresh** functionality
 
 ### 🔧 Technical Features
+
 - **TypeScript** for type safety
 - **State management** with Zustand
 - **Image optimization** and preloading
@@ -124,6 +128,7 @@ GOOGLE_MAPS_API_KEY_ANDROID=your_google_maps_api_key_here
 ```
 
 **How to get Google Maps API Key:**
+
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select existing one
 3. Enable Maps SDK for Android
@@ -148,12 +153,14 @@ npx expo start
 ## 📱 How to Use the App
 
 ### 1. Launch List Screen
+
 - **Browse launches**: Scroll through all SpaceX launches
 - **Search**: Use the search bar to find specific missions
 - **Pull to refresh**: Get the latest launch data
 - **Tap launch**: View detailed information about a mission
 
 ### 2. Launch Detail Screen
+
 - **Mission information**: Complete launch details and timeline
 - **Mission patch**: High-quality mission patch images
 - **Launchpad data**: Location and facility information
@@ -161,6 +168,7 @@ npx expo start
 - **Wikipedia**: External links for additional information
 
 ### 3. Map Screen
+
 - **Interactive map**: View launchpad locations worldwide
 - **User location**: See your current position (requires permission)
 - **Distance calculation**: Real-time distance to launchpads
@@ -193,16 +201,19 @@ npx tsc --noEmit      # Check TypeScript types
 The app uses a centralized design system in `src/utils/constants.ts`:
 
 ### Colors
+
 - **Primary**: `#007AFF` (iOS blue)
 - **Secondary**: `#34C759` (success green)
 - **Map Colors**: Launchpad (red), User Location (blue)
 
 ### Typography
+
 - **Font Sizes**: 12px to 48px scale
 - **Font Weights**: 400 (normal) to 700 (bold)
 - **Line Heights**: 1.2 (tight) to 1.75 (relaxed)
 
 ### Spacing
+
 - **Base Unit**: 4px
 - **Scale**: xs(4px) to 4xl(48px)
 - **Component-specific**: Card, button, and input spacing
@@ -210,12 +221,14 @@ The app uses a centralized design system in `src/utils/constants.ts`:
 ## 🔐 Permissions & Privacy
 
 ### Location Permission
+
 - **Purpose**: Calculate distance to launchpads and show user location on map
 - **Permission Type**: `ACCESS_FINE_LOCATION` (Android), `NSLocationWhenInUseUsageDescription` (iOS)
 - **User Control**: Can deny permission, app works without location
 - **Data Usage**: Location data never leaves your device
 
 ### Network Permission
+
 - **Purpose**: Fetch SpaceX launch data and mission information
 - **Data**: Public SpaceX API data only
 - **Privacy**: No personal data collection or tracking
@@ -225,11 +238,13 @@ The app uses a centralized design system in `src/utils/constants.ts`:
 ### Common Issues
 
 1. **Metro bundler errors**
+
    ```bash
    npx expo start --clear
    ```
 
 2. **TypeScript errors**
+
    ```bash
    npx tsc --noEmit
    ```
@@ -258,12 +273,14 @@ The app uses a centralized design system in `src/utils/constants.ts`:
 ## 📊 API Integration
 
 ### SpaceX API
+
 - **Base URL**: `https://api.spacexdata.com`
 - **Endpoints**: Launches, launchpads, and mission data
 - **Rate Limiting**: Public API with reasonable limits
 - **Data Format**: JSON with comprehensive mission information
 
 ### Error Handling
+
 - **Network errors**: Automatic retry with exponential backoff
 - **API errors**: User-friendly error messages
 - **Offline support**: Graceful degradation when network unavailable
@@ -281,6 +298,7 @@ We welcome contributions! Here's how to get started:
 7. **Open a Pull Request**
 
 ### Development Guidelines
+
 - Use TypeScript for all new code
 - Follow existing component patterns
 - Maintain consistent styling using the design system
@@ -309,4 +327,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Ready to explore space? 🚀 Download the app and start your journey through SpaceX launches!**
 
-*Built with ❤️ for the space community*
+_Built with ❤️ for the space community_

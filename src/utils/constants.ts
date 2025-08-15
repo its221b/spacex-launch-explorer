@@ -3,17 +3,14 @@ export const COLORS = {
   primaryLight: '#e7f0ff',
 
   secondary: '#34C759',
-  secondaryLight: '#e7f7e7',
 
   success: '#34C759',
   successLight: '#e7f7e7',
   warning: '#ff6b6b',
-  warningLight: '#ffe7e7',
   error: '#ff6b6b',
   errorLight: '#ffe7e7',
 
   white: '#fff',
-  black: '#000',
   gray: {
     50: '#f8f9fa',
     100: '#f1f3f5',
@@ -73,8 +70,6 @@ export const TYPOGRAPHY = {
 } as const;
 
 export const SPACING = {
-  base: 4,
-
   xs: 4,
   sm: 8,
   md: 12,
@@ -83,19 +78,6 @@ export const SPACING = {
   '2xl': 24,
   '3xl': 32,
   '4xl': 48,
-
-  card: {
-    padding: 16,
-    margin: 16,
-  },
-  button: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  input: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
 } as const;
 
 export const BORDER_RADIUS = {
@@ -171,50 +153,3 @@ export const getLaunchStatusStyle = (status: LaunchStatusType) => {
       };
   }
 };
-
-export const COMMON_STYLES = {
-  card: {
-    backgroundColor: COLORS.card,
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.card.padding,
-    ...SHADOWS.md,
-  },
-
-  button: {
-    primary: {
-      backgroundColor: COLORS.primary,
-      borderRadius: BORDER_RADIUS.md,
-      paddingHorizontal: SPACING.button.paddingHorizontal,
-      paddingVertical: SPACING.button.paddingVertical,
-    },
-    secondary: {
-      backgroundColor: COLORS.secondary,
-      borderRadius: BORDER_RADIUS.md,
-      paddingHorizontal: SPACING.button.paddingHorizontal,
-      paddingVertical: SPACING.button.paddingVertical,
-    },
-  },
-
-  text: {
-    heading: {
-      fontSize: TYPOGRAPHY.size.xl,
-      fontWeight: TYPOGRAPHY.weight.semibold,
-      color: COLORS.textPrimary,
-    },
-    subheading: {
-      fontSize: TYPOGRAPHY.size.lg,
-      fontWeight: TYPOGRAPHY.weight.semibold,
-      color: COLORS.textPrimary,
-    },
-    body: {
-      fontSize: TYPOGRAPHY.size.base,
-      fontWeight: TYPOGRAPHY.weight.normal,
-      color: COLORS.textSecondary,
-    },
-    caption: {
-      fontSize: TYPOGRAPHY.size.sm,
-      fontWeight: TYPOGRAPHY.weight.normal,
-      color: COLORS.textTertiary,
-    },
-  },
-} as const;

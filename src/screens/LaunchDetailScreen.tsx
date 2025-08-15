@@ -20,7 +20,6 @@ import {
   TYPOGRAPHY,
   SPACING,
   BORDER_RADIUS,
-  COMMON_STYLES,
   getLaunchStatusStyle,
 } from '../utils/constants';
 import { Ionicons } from '@expo/vector-icons';
@@ -41,7 +40,7 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
         setLoading(true);
         const launchData = await getLaunchById(id);
         setLaunch(launchData);
-        
+
         if (launchData?.launchpad) {
           const launchpadData = await getLaunchpadById(launchData.launchpad);
           setLaunchpad(launchpadData);
@@ -163,7 +162,7 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
           <View style={styles.buttonContainer}>
             {launch.links?.wikipedia && (
               <TouchableOpacity
-                style={[styles.button, COMMON_STYLES.button.primary]}
+                style={[styles.button, styles.buttonPrimary]}
                 onPress={openWikipedia}
               >
                 <Ionicons name="open-outline" size={20} color={COLORS.white} />
@@ -171,10 +170,7 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
               </TouchableOpacity>
             )}
 
-            <TouchableOpacity
-              style={[styles.button, COMMON_STYLES.button.secondary]}
-              onPress={openMap}
-            >
+            <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={openMap}>
               <Ionicons name="map-outline" size={20} color={COLORS.white} />
               <Text style={styles.buttonText}>View on Map</Text>
             </TouchableOpacity>
@@ -312,10 +308,12 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginTop: SPACING.lg,
     marginBottom: SPACING['2xl'],
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.md,
   },
   button: {
     flexDirection: 'row',
@@ -324,11 +322,21 @@ const styles = StyleSheet.create({
     minWidth: SPACING.xl * 7,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
+    borderWidth: 2,
+    borderRadius: BORDER_RADIUS.md,
   },
   buttonText: {
     color: COLORS.white,
     fontSize: TYPOGRAPHY.size.base,
     fontWeight: TYPOGRAPHY.weight.semibold,
     marginLeft: SPACING.xs,
+  },
+  buttonPrimary: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  buttonSecondary: {
+    backgroundColor: COLORS.secondary,
+    borderColor: COLORS.secondary,
   },
 });

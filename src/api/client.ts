@@ -3,7 +3,7 @@ import { logError } from '../utils/logger';
 import { getNetworkErrorMessage } from '../utils/networkUtils';
 
 const client = axios.create({
-  baseURL: 'https://api.spacexdata.com',
+  baseURL: 'https://api.spacexdata.com/v5',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',

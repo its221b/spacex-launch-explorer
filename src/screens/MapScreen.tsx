@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLaunchStore } from '../store/launcheStore';
 import MapViewComponent from '../components/MapViewComponent';
 import useLocation from '../hooks/useLocation';
-import { haversineKm, formatDistance } from '../utils/distanceCalculator';
+import { haversineKm } from '../utils/distanceCalculator';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../utils/constants';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -45,10 +45,8 @@ export default function MapScreen() {
       <View style={{ flex: 1, paddingTop: insets.top, paddingBottom: insets.bottom }}>
         <View style={styles.center}>
           <Ionicons name="map" size={64} color={COLORS.textSecondary} />
-          <Text style={styles.loadingText}>No Launchpad Selected</Text>
-          <Text
-            style={[styles.loadingText, { fontSize: TYPOGRAPHY.size.sm, marginTop: SPACING.sm }]}
-          >
+          <Text style={styles.loadingText}>Welcome to Launchpad Map</Text>
+          <Text style={styles.instructionText}>
             Select a launch from the Launches tab to view its location on the map.
           </Text>
         </View>
@@ -108,6 +106,9 @@ export default function MapScreen() {
         <View style={styles.center}>
           <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={styles.loadingText}>Loading launchpad...</Text>
+          <Text style={styles.loadingSubtext}>
+            Please wait while we fetch the launchpad data...
+          </Text>
         </View>
       </View>
     );
@@ -142,7 +143,7 @@ export default function MapScreen() {
           {distance && (
             <View style={styles.distanceContainer}>
               <Ionicons name="location" size={16} color={COLORS.primary} />
-              <Text style={styles.distanceText}>{formatDistance(distance)} away</Text>
+              <Text style={styles.distanceText}>{distance.toFixed(2)} km away</Text>
             </View>
           )}
 
@@ -215,6 +216,17 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
     fontSize: TYPOGRAPHY.size.base,
     color: COLORS.textSecondary,
+  },
+  loadingSubtext: {
+    marginTop: SPACING.xs,
+    fontSize: TYPOGRAPHY.size.sm,
+    color: COLORS.textSecondary,
+  },
+  instructionText: {
+    marginTop: SPACING.sm,
+    fontSize: TYPOGRAPHY.size.sm,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
   },
   infoCard: {
     position: 'absolute',

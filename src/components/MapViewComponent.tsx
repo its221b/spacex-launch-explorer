@@ -1,7 +1,18 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { COLORS, SPACING, TYPOGRAPHY } from '../utils/constants';
+import { Platform, StyleSheet, Text, View, TouchableOpacity, Linking, Alert } from 'react-native';
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../utils/constants';
+import { Ionicons } from '@expo/vector-icons';
+
+let MapView: any = null;
+let Marker: any = null;
+let PROVIDER_GOOGLE: any = null;
+
+try {
+  const mapsModule = require('react-native-maps');
+  MapView = mapsModule.default;
+  Marker = mapsModule.Marker;
+  PROVIDER_GOOGLE = mapsModule.PROVIDER_GOOGLE;
+} catch {}
 
 type LaunchpadMarker = {
   latitude: number;
@@ -16,7 +27,7 @@ export default function MapViewComponent({
   launchpad: LaunchpadMarker;
   user?: { latitude: number; longitude: number };
 }) {
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<any>(null);
 
   const mapProvider = Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined;
 
@@ -60,6 +71,55 @@ export default function MapViewComponent({
       });
     }
   }, [launchpad, user]);
+
+  if (!MapView || !Marker) {
+    return (
+      <View style={styles.fallbackContainer}>
+        <View style={styles.fallbackContent}>
+          <Ionicons name="map" size={64} color={COLORS.textSecondary} />
+          <Text style={styles.fallbackTitle}>Map Not Available</Text>
+          <Text style={styles.fallbackText}>
+            This feature requires a development build of the app.
+          </Text>
+
+          <View style={styles.coordinatesContainer}>
+            <View style={styles.coordinateItem}>
+              <Text style={styles.coordinateLabel}>Launchpad:</Text>
+              <Text style={styles.coordinateValue}>
+                {launchpad.latitude.toFixed(4)}, {launchpad.longitude.toFixed(4)}
+              </Text>
+            </View>
+
+            {user && (
+              <View style={styles.coordinateItem}>
+                <Text style={styles.coordinateLabel}>Your Location:</Text>
+                <Text style={styles.coordinateValue}>
+                  {user.latitude.toFixed(4)}, {user.longitude.toFixed(4)}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          <TouchableOpacity
+            style={styles.openMapsButton}
+            onPress={() => {
+              const url =
+                Platform.OS === 'ios'
+                  ? `http://maps.apple.com/?q=${launchpad.latitude},${launchpad.longitude}`
+                  : `https://www.google.com/maps?q=${launchpad.latitude},${launchpad.longitude}`;
+
+              Linking.openURL(url).catch(() => {
+                Alert.alert('Error', 'Could not open Maps app');
+              });
+            }}
+          >
+            <Ionicons name="navigate" size={20} color={COLORS.white} />
+            <Text style={styles.openMapsText}>Open in Maps App</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -160,5 +220,64 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 3,
     letterSpacing: 0.5,
+  },
+  fallbackContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+  },
+  fallbackContent: {
+    alignItems: 'center',
+    padding: SPACING.lg,
+    backgroundColor: COLORS.white,
+    borderRadius: BORDER_RADIUS.lg,
+    ...SHADOWS.md,
+  },
+  fallbackTitle: {
+    marginTop: SPACING.md,
+    fontSize: TYPOGRAPHY.size.lg,
+    fontWeight: TYPOGRAPHY.weight.bold,
+    color: COLORS.textPrimary,
+  },
+  fallbackText: {
+    marginTop: SPACING.sm,
+    fontSize: TYPOGRAPHY.size.base,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    marginBottom: SPACING.lg,
+  },
+  coordinatesContainer: {
+    marginTop: SPACING.md,
+    marginBottom: SPACING.lg,
+  },
+  coordinateItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.xs,
+  },
+  coordinateLabel: {
+    fontSize: TYPOGRAPHY.size.sm,
+    color: COLORS.textSecondary,
+  },
+  coordinateValue: {
+    fontSize: TYPOGRAPHY.size.sm,
+    fontWeight: TYPOGRAPHY.weight.bold,
+    color: COLORS.textPrimary,
+  },
+  openMapsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: BORDER_RADIUS.md,
+    ...SHADOWS.sm,
+  },
+  openMapsText: {
+    color: COLORS.white,
+    fontSize: TYPOGRAPHY.size.base,
+    fontWeight: TYPOGRAPHY.weight.bold,
+    marginLeft: SPACING.sm,
   },
 });

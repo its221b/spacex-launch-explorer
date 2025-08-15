@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,25 +12,16 @@ const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 export default function BottomTabs() {
   const insets = useSafeAreaInsets();
-  const { selectedLaunchpadId, clearSelectedLaunchpadId } = useLaunchStore();
-  const [tabKey, setTabKey] = useState('launches');
-
-  useEffect(() => {
-    if (selectedLaunchpadId) {
-      setTabKey('map');
-    }
-  }, [selectedLaunchpadId]);
+  const { clearSelectedLaunchpadId } = useLaunchStore();
 
   const handleTabPress = (tabName: 'Launches' | 'Map') => {
     if (tabName === 'Launches') {
       clearSelectedLaunchpadId();
-      setTabKey('launches');
     }
   };
 
   return (
     <Tab.Navigator
-      key={tabKey}
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap;
@@ -62,7 +53,7 @@ export default function BottomTabs() {
         },
         headerShown: false,
       })}
-      initialRouteName={tabKey === 'map' ? 'Map' : 'Launches'}
+      initialRouteName="Launches"
       screenListeners={{
         tabPress: (e) => {
           const routeName = e.target?.split('-')[0];
