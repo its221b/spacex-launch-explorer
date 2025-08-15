@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Image } from 'react-native';
 
 interface UseImageOptimizationProps {
@@ -46,23 +46,30 @@ export const useImageOptimization = ({
     }
   }, []);
 
+  const memoizedOptimizedUrl = useMemo(() => {
+    if (!imageUrl) return null;
+    return getOptimizedUrl(imageUrl);
+  }, [imageUrl, getOptimizedUrl]);
+
   useEffect(() => {
     if (imageUrl) {
-      const optimized = getOptimizedUrl(imageUrl);
-      setOptimizedUrl(optimized);
-      setIsLoading(true);
-      setHasError(false);
-      setIsLoaded(false);
+      const optimized = memoizedOptimizedUrl;
+      if (optimized !== optimizedUrl) {
+        setOptimizedUrl(optimized);
+        setIsLoading(true);
+        setHasError(false);
+        setIsLoaded(false);
 
-      preloadImage(optimized).then((success) => {
-        setIsLoading(false);
-        if (success) {
-          setIsLoaded(true);
-        } else {
-          setOptimizedUrl(imageUrl);
-          setIsLoaded(true);
-        }
-      });
+        preloadImage(optimized).then((success) => {
+          setIsLoading(false);
+          if (success) {
+            setIsLoaded(true);
+          } else {
+            setOptimizedUrl(imageUrl);
+            setIsLoaded(true);
+          }
+        });
+      }
     } else if (fallbackUrl) {
       setOptimizedUrl(fallbackUrl);
       setIsLoaded(true);
@@ -70,7 +77,7 @@ export const useImageOptimization = ({
       setOptimizedUrl(null);
       setIsLoaded(false);
     }
-  }, [imageUrl, fallbackUrl, getOptimizedUrl, preloadImage]);
+  }, [imageUrl, fallbackUrl, memoizedOptimizedUrl, optimizedUrl, preloadImage]);
 
   const retry = useCallback(() => {
     if (imageUrl) {

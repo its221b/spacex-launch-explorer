@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Launch } from '../api/types';
@@ -17,7 +17,7 @@ type Props = {
   launch: Launch;
 };
 
-export default function LaunchItem({ launch }: Props) {
+const LaunchItem = memo(({ launch }: Props) => {
   const navigation = useNavigation<any>();
   const status = getLaunchStatus(launch);
   const statusStyle = getLaunchStatusStyle(status);
@@ -26,9 +26,13 @@ export default function LaunchItem({ launch }: Props) {
     imageUrl: launch.links?.patch?.small || launch.links?.patch?.large || null,
   });
 
-  const handlePress = () => {
+  const handlePress = useCallback(() => {
     navigation.navigate('LaunchDetail', { id: launch.id });
-  };
+  }, [navigation, launch.id]);
+
+  const handleRetry = useCallback(() => {
+    retry();
+  }, [retry]);
 
   return (
     <TouchableOpacity style={styles.container} onPress={handlePress} activeOpacity={0.7}>
@@ -56,7 +60,7 @@ export default function LaunchItem({ launch }: Props) {
               )}
 
               {hasError && (
-                <TouchableOpacity style={styles.errorOverlay} onPress={retry}>
+                <TouchableOpacity style={styles.errorOverlay} onPress={handleRetry}>
                   <Text style={styles.errorText}>🚀</Text>
                   <Text style={styles.retryText}>Tap to retry</Text>
                 </TouchableOpacity>
@@ -86,7 +90,11 @@ export default function LaunchItem({ launch }: Props) {
       </View>
     </TouchableOpacity>
   );
-}
+});
+
+LaunchItem.displayName = 'LaunchItem';
+
+export default LaunchItem;
 
 const styles = StyleSheet.create({
   container: {

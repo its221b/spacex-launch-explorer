@@ -15,7 +15,6 @@ type State = {
   maxRetries: number;
   searchQuery: string;
   currentPage: number;
-
   selectedLaunchpad: Launchpad | null;
   selectedLaunchpadId: string | null;
 };
@@ -27,7 +26,6 @@ type Actions = {
   searchLaunches: (query: string) => Promise<void>;
   clearSearch: () => Promise<void>;
   retryLaunches: () => Promise<void>;
-
   fetchLaunchpadById: (id: string) => Promise<void>;
   setSelectedLaunchpadId: (id: string | null) => void;
   clearError: () => void;
@@ -46,7 +44,6 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
     });
   };
 
-  // Manual pagination function since API might return all data
   const paginateLaunches = (allLaunches: Launch[], page: number, limit: number) => {
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
@@ -68,7 +65,6 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
     maxRetries: 3,
     searchQuery: '',
     currentPage: 1,
-
     selectedLaunchpad: null,
     selectedLaunchpadId: null,
 
@@ -79,11 +75,8 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
 
       set({ loading: true, error: null, currentPage: 1 });
       try {
-        // Fetch all launches first (since API might ignore pagination)
-        const data = await getLaunches(1, 1000); // Request large limit to get all data
+        const data = await getLaunches(1, 1000);
         const allLaunches = ensureUniqueLaunches(data.docs);
-
-        // Manually paginate the first page
         const { pageData, hasNextPage: hasMore } = paginateLaunches(allLaunches, 1, 10);
 
         set({
@@ -130,8 +123,6 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
       set({ loadingMore: true });
       try {
         const nextPage = currentPage + 1;
-
-        // Use manual pagination from cached data
         const { pageData, hasNextPage: hasMore } = paginateLaunches(originalLaunches, nextPage, 10);
 
         if (pageData.length > 0) {
@@ -213,10 +204,8 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
     refreshLaunches: async () => {
       set({ refreshing: true, error: null });
       try {
-        const data = await getLaunches(1, 1000); // Get all launches
+        const data = await getLaunches(1, 1000);
         const allLaunches = ensureUniqueLaunches(data.docs);
-
-        // Manually paginate the first page
         const { pageData, hasNextPage: hasMore } = paginateLaunches(allLaunches, 1, 10);
 
         set({

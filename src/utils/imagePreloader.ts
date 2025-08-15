@@ -4,6 +4,7 @@ class ImagePreloader {
   private preloadedImages: Set<string> = new Set();
   private preloadQueue: string[] = [];
   private isProcessing = false;
+  private batchSize = 5;
 
   preloadImage(url: string): Promise<boolean> {
     return new Promise((resolve) => {
@@ -27,7 +28,13 @@ class ImagePreloader {
     let success = 0;
     let failed = 0;
 
-    for (const url of urls) {
+    const uniqueUrls = urls.filter((url) => !this.preloadedImages.has(url));
+
+    if (uniqueUrls.length === 0) {
+      return { success: urls.length, failed: 0 };
+    }
+
+    for (const url of uniqueUrls) {
       try {
         const result = await this.preloadImage(url);
         if (result) {
@@ -36,15 +43,16 @@ class ImagePreloader {
           failed++;
         }
       } catch {
-        // Handle preloading error silently
+        failed++;
       }
     }
 
-    return { success, failed };
+    return { success: success + (urls.length - uniqueUrls.length), failed };
   }
 
   queueForPreload(urls: string[]): void {
-    this.preloadQueue.push(...urls);
+    const uniqueUrls = urls.filter((url) => !this.preloadedImages.has(url));
+    this.preloadQueue.push(...uniqueUrls);
 
     if (!this.isProcessing) {
       this.processQueue();
@@ -59,7 +67,7 @@ class ImagePreloader {
     this.isProcessing = true;
 
     while (this.preloadQueue.length > 0) {
-      const batch = this.preloadQueue.splice(0, 5);
+      const batch = this.preloadQueue.splice(0, this.batchSize);
 
       try {
         await this.preloadImages(batch);
@@ -79,6 +87,7 @@ class ImagePreloader {
 
   clearCache(): void {
     this.preloadedImages.clear();
+    this.preloadQueue = [];
   }
 
   getCacheStats(): { preloaded: number; queued: number } {

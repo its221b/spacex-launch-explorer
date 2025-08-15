@@ -10,7 +10,8 @@ interface LogEntry {
 
 class Logger {
   private logs: LogEntry[] = [];
-  private maxLogs = 100;
+  private maxLogs = 50;
+  private isProcessing = false;
 
   private log(level: LogLevel, message: string, data?: any, error?: Error) {
     const entry: LogEntry = {
@@ -43,9 +44,6 @@ class Logger {
           console.log(prefix, message, data);
       }
     }
-
-    if (!__DEV__ && level === 'error') {
-    }
   }
 
   debug(message: string, data?: any) {
@@ -70,10 +68,6 @@ class Logger {
 
   clearLogs() {
     this.logs = [];
-  }
-
-  exportLogs(): string {
-    return JSON.stringify(this.logs, null, 2);
   }
 }
 

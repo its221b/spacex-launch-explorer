@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -54,8 +54,7 @@ export default function LaunchListScreen() {
     return () => {
       subscription?.remove();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initLaunches]);
 
   useEffect(() => {
     if (launches.length > 0) {
@@ -83,19 +82,16 @@ export default function LaunchListScreen() {
     }, 300);
 
     return () => clearTimeout(timeoutId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localSearchQuery]);
+  }, [localSearchQuery, searchLaunches, clearSearch]);
 
   const renderLaunchItem = useCallback(
     ({ item }: { item: any }) => <LaunchItem launch={item} />,
     [],
   );
 
-  const keyExtractor = useCallback((item: any, index: number) => {
-    return `${item.id}-${index}`;
-  }, []);
+  const keyExtractor = useCallback((item: any) => item.id, []);
 
-  const renderFooter = () => {
+  const renderFooter = useCallback(() => {
     if (loadingMore) {
       return (
         <View style={styles.footerLoader}>
@@ -113,9 +109,9 @@ export default function LaunchListScreen() {
     }
 
     return null;
-  };
+  }, [loadingMore, hasNextPage, launches.length]);
 
-  const renderEmptyComponent = () => {
+  const renderEmptyComponent = useCallback(() => {
     if (loading || refreshing) return null;
 
     if (error) {
@@ -146,7 +142,7 @@ export default function LaunchListScreen() {
         subtitle="There are no launches to display at the moment."
       />
     );
-  };
+  }, [loading, refreshing, error, retryLaunches, retryCount, localSearchQuery]);
 
   const handleLoadMore = useCallback(() => {
     if (!loadingMore && hasNextPage && !loading) {
@@ -158,18 +154,22 @@ export default function LaunchListScreen() {
     refreshLaunches();
   }, [refreshLaunches]);
 
+  const handleSearchClear = useCallback(() => {
+    setLocalSearchQuery('');
+    clearSearch();
+  }, [clearSearch]);
+
+  const searchBarValue = useMemo(() => localSearchQuery, [localSearchQuery]);
+
   if (loading && launches.length === 0) {
     return (
       <View style={{ flex: 1, backgroundColor: COLORS.background, paddingTop: insets.top }}>
         <View style={styles.container}>
           <SearchBar
-            value={localSearchQuery}
+            value={searchBarValue}
             onChangeText={setLocalSearchQuery}
             placeholder="Search launches..."
-            onClear={() => {
-              setLocalSearchQuery('');
-              clearSearch();
-            }}
+            onClear={handleSearchClear}
           />
           <Loading />
         </View>
@@ -181,13 +181,10 @@ export default function LaunchListScreen() {
     <View style={{ flex: 1, backgroundColor: COLORS.background, paddingTop: insets.top }}>
       <View style={styles.container}>
         <SearchBar
-          value={localSearchQuery}
+          value={searchBarValue}
           onChangeText={setLocalSearchQuery}
           placeholder="Search launches..."
-          onClear={() => {
-            setLocalSearchQuery('');
-            clearSearch();
-          }}
+          onClear={handleSearchClear}
         />
 
         <FlatList
@@ -212,14 +209,12 @@ export default function LaunchListScreen() {
           maxToRenderPerBatch={8}
           windowSize={8}
           initialNumToRender={6}
-          getItemLayout={undefined}
           maintainVisibleContentPosition={{
             minIndexForVisible: 0,
             autoscrollToTopThreshold: 10,
           }}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           updateCellsBatchingPeriod={50}
-          disableVirtualization={false}
           scrollEventThrottle={16}
           decelerationRate="fast"
           snapToAlignment="start"

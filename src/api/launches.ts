@@ -1,16 +1,6 @@
 import client from './client';
 import { Launch, Launchpad } from './types';
 import { logError } from '../utils/logger';
-import axios from 'axios';
-
-const launchpadClient = axios.create({
-  baseURL: 'https://api.spacexdata.com/v4',
-  timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  },
-});
 
 export interface PaginatedLaunchesResponse {
   docs: Launch[];
@@ -33,10 +23,7 @@ export const getLaunches = async (
     );
     const data = res.data;
 
-    // Check if we're getting more data than requested (API ignoring limit)
     const hasNextPage = data.length > limit;
-
-    // If API is ignoring limit, we need to manually paginate
     const paginatedData = Array.isArray(data) ? data.slice(0, limit) : [];
 
     const result: PaginatedLaunchesResponse = {
@@ -68,7 +55,7 @@ export const getLaunchById = async (id: string): Promise<Launch> => {
 
 export const getLaunchpadById = async (id: string): Promise<Launchpad> => {
   try {
-    const res = await launchpadClient.get(`/launchpads/${id}`);
+    const res = await client.get(`/launchpads/${id}`);
     const launchpad = res.data as Launchpad;
     return launchpad;
   } catch (error) {

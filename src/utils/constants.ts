@@ -12,15 +12,9 @@ export const COLORS = {
 
   white: '#fff',
   gray: {
-    50: '#f8f9fa',
     100: '#f1f3f5',
     200: '#e9ecef',
-    300: '#e8e8e8',
-    400: '#ccc',
-    500: '#999',
     600: '#666',
-    700: '#555',
-    800: '#333',
   },
 
   background: '#fff',
@@ -50,22 +44,15 @@ export const TYPOGRAPHY = {
     base: 16,
     lg: 18,
     xl: 20,
-    '2xl': 24,
-    '3xl': 32,
-    '4xl': 48,
   },
 
   weight: {
-    normal: '400',
-    medium: '500',
     semibold: '600',
     bold: '700',
   },
 
   lineHeight: {
-    tight: 1.2,
     normal: 1.5,
-    relaxed: 1.75,
   },
 } as const;
 
@@ -86,7 +73,6 @@ export const BORDER_RADIUS = {
   md: 12,
   lg: 16,
   xl: 20,
-  full: 9999,
 } as const;
 
 export const SHADOWS = {
@@ -110,13 +96,6 @@ export const SHADOWS = {
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 4,
-  },
-  xl: {
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 8,
   },
 } as const;
 

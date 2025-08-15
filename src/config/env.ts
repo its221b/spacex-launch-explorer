@@ -1,13 +1,11 @@
-import { GOOGLE_MAPS_API_KEY_ANDROID, API_BASE_URL } from '@env';
+import { GOOGLE_MAPS_API_KEY_ANDROID } from '@env';
 
 interface EnvironmentConfig {
   GOOGLE_MAPS_API_KEY_ANDROID: string;
-  API_BASE_URL: string;
 }
 
 const config: EnvironmentConfig = {
   GOOGLE_MAPS_API_KEY_ANDROID: GOOGLE_MAPS_API_KEY_ANDROID || '',
-  API_BASE_URL: API_BASE_URL || 'https://api.spacexdata.com/v4',
 };
 
 export const validateEnvironment = (): void => {
