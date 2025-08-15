@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { COLORS } from '../utils/constants';
+import { COLORS, SPACING, TYPOGRAPHY } from '../utils/constants';
 
 type LaunchpadMarker = {
   latitude: number;
@@ -138,8 +138,8 @@ const styles = StyleSheet.create({
 
   markerLabel: {
     backgroundColor: COLORS.map.launchpad,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
     borderRadius: 20,
     borderWidth: 3,
     borderColor: COLORS.white,
@@ -153,8 +153,8 @@ const styles = StyleSheet.create({
   },
   markerText: {
     color: COLORS.white,
-    fontSize: 14,
-    fontWeight: '800',
+    fontSize: TYPOGRAPHY.size.sm,
+    fontWeight: TYPOGRAPHY.weight.bold,
     textAlign: 'center',
     textShadowColor: 'rgba(0, 0, 0, 0.9)',
     textShadowOffset: { width: 0, height: 2 },

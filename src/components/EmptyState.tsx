@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, TYPOGRAPHY, SPACING } from '../utils/constants';
+import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from '../utils/constants';
 
 type Props = {
   icon?: string;
@@ -42,8 +42,11 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: TYPOGRAPHY.size.sm,
-    color: COLORS.textTertiary,
+    color: COLORS.textSecondary,
+    lineHeight: TYPOGRAPHY.size.sm * TYPOGRAPHY.lineHeight.normal,
     textAlign: 'center',
-    lineHeight: TYPOGRAPHY.lineHeight.normal,
+    backgroundColor: COLORS.primaryLight,
+    padding: SPACING.xs,
+    borderRadius: BORDER_RADIUS.xs,
   },
 });

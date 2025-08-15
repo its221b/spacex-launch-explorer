@@ -66,7 +66,6 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     marginBottom: SPACING['2xl'],
     textAlign: 'center',
-    lineHeight: TYPOGRAPHY.lineHeight.normal,
   },
   retryButton: {
     marginBottom: SPACING['2xl'],

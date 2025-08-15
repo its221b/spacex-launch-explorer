@@ -39,18 +39,13 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [launchData, launchpadData] = await Promise.all([
-          getLaunchById(id),
-          getLaunchById(id).then(async (launch) => {
-            if (launch?.launchpad) {
-              return getLaunchpadById(launch.launchpad);
-            }
-            return null;
-          }),
-        ]);
-
+        const launchData = await getLaunchById(id);
         setLaunch(launchData);
-        setLaunchpad(launchpadData);
+        
+        if (launchData?.launchpad) {
+          const launchpadData = await getLaunchpadById(launchData.launchpad);
+          setLaunchpad(launchpadData);
+        }
       } catch (error) {
         console.error('Error fetching launch details:', error);
         Alert.alert('Error', 'Failed to load launch details');
@@ -213,8 +208,8 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
   patch: {
-    width: 200,
-    height: 200,
+    width: SPACING.xl * 10,
+    height: SPACING.xl * 10,
     borderRadius: BORDER_RADIUS.lg,
   },
   infoContainer: {
@@ -259,15 +254,18 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   details: {
-    fontSize: TYPOGRAPHY.size.base,
+    fontSize: TYPOGRAPHY.size.sm,
     color: COLORS.textSecondary,
-    lineHeight: TYPOGRAPHY.lineHeight.normal,
+    lineHeight: TYPOGRAPHY.size.sm * TYPOGRAPHY.lineHeight.normal,
+    backgroundColor: COLORS.primaryLight,
+    padding: SPACING.xs,
+    borderRadius: BORDER_RADIUS.xs,
   },
   launchpadInfo: {
     backgroundColor: COLORS.surface,
     padding: SPACING.md,
     borderRadius: BORDER_RADIUS.md,
-    minHeight: 80,
+    minHeight: SPACING.xl * 4,
   },
   launchpadHeader: {
     flexDirection: 'row',
@@ -323,7 +321,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: 140,
+    minWidth: SPACING.xl * 7,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
   },

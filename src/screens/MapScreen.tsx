@@ -242,25 +242,19 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.size.sm,
     color: COLORS.textSecondary,
     marginBottom: SPACING.sm,
-    marginLeft: 28,
+    marginLeft: SPACING.xl,
   },
   distanceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.xs,
     marginBottom: SPACING.sm,
-    marginLeft: 28,
+    marginLeft: SPACING.xl,
   },
   distanceText: {
     fontSize: TYPOGRAPHY.size.sm,
     color: COLORS.primary,
     fontWeight: TYPOGRAPHY.weight.medium,
-  },
-  launchpadDetails: {
-    fontSize: TYPOGRAPHY.size.sm,
-    color: COLORS.textSecondary,
-    lineHeight: TYPOGRAPHY.lineHeight.normal,
-    marginLeft: 28,
   },
   permissionCard: {
     position: 'absolute',
@@ -286,7 +280,7 @@ const styles = StyleSheet.create({
   permissionText: {
     fontSize: TYPOGRAPHY.size.sm,
     color: COLORS.textSecondary,
-    lineHeight: TYPOGRAPHY.lineHeight.normal,
+    lineHeight: TYPOGRAPHY.size.sm * TYPOGRAPHY.lineHeight.normal,
     marginBottom: SPACING.md,
   },
   permissionButton: {
