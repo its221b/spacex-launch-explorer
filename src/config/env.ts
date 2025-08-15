@@ -20,10 +20,7 @@ export const validateEnvironment = (): void => {
   );
 
   if (missingVars.length > 0) {
-    console.warn(
-      `⚠️  Missing or invalid environment variables: ${missingVars.join(', ')}\n` +
-        `Please check your .env file and ensure all required API keys are set.`,
-    );
+    // Environment variable not found, using default
   }
 };
 

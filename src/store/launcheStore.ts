@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { getLaunches, getLaunchpadById } from '../api/launches';
 import { Launch, Launchpad } from '../api/types';
-import { logError, logInfo, logWarn } from '../utils/logger';
+import { logError } from '../utils/logger';
 
 type State = {
   launches: Launch[];
@@ -46,6 +46,16 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
     });
   };
 
+  // Manual pagination function since API might return all data
+  const paginateLaunches = (allLaunches: Launch[], page: number, limit: number) => {
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const pageData = allLaunches.slice(startIndex, endIndex);
+    const hasNextPage = endIndex < allLaunches.length;
+
+    return { pageData, hasNextPage, totalLaunches: allLaunches.length };
+  };
+
   return {
     launches: [],
     originalLaunches: [],
@@ -63,31 +73,32 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
     selectedLaunchpadId: null,
 
     initLaunches: async () => {
-      const currentLaunches = get().launches;
-      const currentSearchQuery = get().searchQuery;
+      const { launches: currentLaunches, searchQuery, hasNextPage } = get();
 
-      if (currentLaunches.length > 0 && !currentSearchQuery && get().hasNextPage !== false) return;
+      if (currentLaunches.length > 0 && !searchQuery && hasNextPage !== false) return;
 
       set({ loading: true, error: null, currentPage: 1 });
       try {
-        logInfo('Initializing launches');
-        const data = await getLaunches(1, 10);
-        const uniqueLaunches = ensureUniqueLaunches(data.docs);
+        // Fetch all launches first (since API might ignore pagination)
+        const data = await getLaunches(1, 1000); // Request large limit to get all data
+        const allLaunches = ensureUniqueLaunches(data.docs);
+
+        // Manually paginate the first page
+        const { pageData, hasNextPage: hasMore } = paginateLaunches(allLaunches, 1, 10);
+
         set({
-          launches: uniqueLaunches,
-          originalLaunches: uniqueLaunches,
-          hasNextPage: data.hasNextPage,
+          launches: pageData,
+          originalLaunches: allLaunches,
+          hasNextPage: hasMore,
           loading: false,
           retryCount: 0,
           currentPage: 1,
         });
-        logInfo(`Loaded ${uniqueLaunches.length} launches, hasNextPage: ${data.hasNextPage}`);
       } catch (error: any) {
         const { retryCount, maxRetries } = get();
         const newRetryCount = retryCount + 1;
 
         if (newRetryCount <= maxRetries) {
-          logWarn(`Launch fetch failed, retrying ${newRetryCount}/${maxRetries}`);
           set({
             retryCount: newRetryCount,
             loading: false,
@@ -100,7 +111,6 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
         } else {
           const errorMessage =
             error.message || 'Failed to fetch launches. Please check your internet connection.';
-          logError(errorMessage, error as Error);
           set({
             error: errorMessage,
             loading: false,
@@ -111,7 +121,7 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
     },
 
     loadMore: async () => {
-      const { loadingMore, hasNextPage, currentPage, searchQuery } = get();
+      const { loadingMore, hasNextPage, currentPage, searchQuery, originalLaunches } = get();
 
       if (loadingMore || !hasNextPage || searchQuery.trim()) {
         return;
@@ -120,26 +130,19 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
       set({ loadingMore: true });
       try {
         const nextPage = currentPage + 1;
-        const data = await getLaunches(nextPage, 10);
 
-        const existingIds = new Set(get().launches.map((launch) => launch.id));
-        const newLaunches = data.docs.filter((launch) => !existingIds.has(launch.id));
+        // Use manual pagination from cached data
+        const { pageData, hasNextPage: hasMore } = paginateLaunches(originalLaunches, nextPage, 10);
 
-        if (newLaunches.length > 0) {
+        if (pageData.length > 0) {
           set((state) => ({
-            launches: ensureUniqueLaunches([...state.launches, ...newLaunches]),
-            originalLaunches: ensureUniqueLaunches([...state.originalLaunches, ...newLaunches]),
-            hasNextPage: data.hasNextPage,
+            launches: [...state.launches, ...pageData],
+            hasNextPage: hasMore,
             loadingMore: false,
             currentPage: nextPage,
           }));
-
-          logInfo(
-            `Loaded more launches: page ${nextPage}, added ${newLaunches.length} new launches`,
-          );
         } else {
           set({ hasNextPage: false, loadingMore: false });
-          logInfo('No more launches to load - reached end of data');
         }
       } catch (error: any) {
         logError('Failed to load more launches', error as Error);
@@ -182,8 +185,6 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
           retryCount: 0,
           currentPage: 1,
         });
-
-        logInfo(`Local search results: ${filteredLaunches.length} launches found for "${query}"`);
       } catch (error: any) {
         const errorMessage = 'Search failed. Please try again.';
         logError(errorMessage, error as Error);
@@ -210,34 +211,33 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
     },
 
     refreshLaunches: async () => {
-      set({ refreshing: true, error: null, retryCount: 0, currentPage: 1 });
+      set({ refreshing: true, error: null });
       try {
-        logInfo('Refreshing launches');
-        const data = await getLaunches(1, 10);
-        const uniqueLaunches = ensureUniqueLaunches(data.docs);
+        const data = await getLaunches(1, 1000); // Get all launches
+        const allLaunches = ensureUniqueLaunches(data.docs);
+
+        // Manually paginate the first page
+        const { pageData, hasNextPage: hasMore } = paginateLaunches(allLaunches, 1, 10);
+
         set({
-          launches: uniqueLaunches,
-          hasNextPage: data.hasNextPage,
+          launches: pageData,
+          originalLaunches: allLaunches,
+          hasNextPage: hasMore,
           refreshing: false,
           retryCount: 0,
           currentPage: 1,
         });
-        logInfo(`Refreshed ${uniqueLaunches.length} launches`);
       } catch (error: any) {
-        const errorMessage =
-          error.message || 'Failed to refresh launches. Please check your internet connection.';
-        logError(errorMessage, error as Error);
-        set({ error: errorMessage, refreshing: false });
+        logError('Failed to refresh launches', error as Error);
+        set({ refreshing: false, error: 'Failed to refresh launches' });
       }
     },
 
     fetchLaunchpadById: async (id: string) => {
       try {
-        logInfo(`Fetching launchpad: ${id}`);
         const pad = await getLaunchpadById(id);
         if (pad && typeof pad.latitude === 'number' && typeof pad.longitude === 'number') {
           set({ selectedLaunchpad: pad });
-          logInfo(`Loaded launchpad: ${pad.name}`);
         } else {
           const errorMessage = 'Launchpad not found or missing coordinates.';
           logError(errorMessage);

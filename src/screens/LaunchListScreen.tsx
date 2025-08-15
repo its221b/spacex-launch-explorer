@@ -49,7 +49,6 @@ export default function LaunchListScreen() {
     };
 
     const subscription = AppState.addEventListener('change', handleAppStateChange);
-
     initLaunches();
 
     return () => {
@@ -140,17 +139,13 @@ export default function LaunchListScreen() {
       );
     }
 
-    if (launches.length === 0 && !loading && !refreshing) {
-      return (
-        <EmptyState
-          icon="rocket-outline"
-          title="No launches available"
-          subtitle="There are currently no launches to display. Check back later!"
-        />
-      );
-    }
-
-    return null;
+    return (
+      <EmptyState
+        icon="rocket-outline"
+        title="No launches available"
+        subtitle="There are no launches to display at the moment."
+      />
+    );
   };
 
   const handleLoadMore = useCallback(() => {

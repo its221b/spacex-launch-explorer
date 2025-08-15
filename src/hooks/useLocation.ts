@@ -42,8 +42,7 @@ export default function useLocation() {
           setError('Location permission denied');
         }
       }
-    } catch (err) {
-      console.error('Error requesting location permission:', err);
+    } catch {
       setError('Failed to request location permission');
       setDenied(true);
     } finally {
@@ -66,8 +65,7 @@ export default function useLocation() {
       });
       setDenied(false);
       setError(null);
-    } catch (err) {
-      console.error('Error getting current location:', err);
+    } catch {
       setError('Failed to get current location');
       setDenied(true);
     } finally {

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,6 @@ import {
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
-  PermissionsAndroid,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLaunchStore } from '../store/launcheStore';
@@ -22,7 +21,6 @@ export default function MapScreen() {
   const insets = useSafeAreaInsets();
   const { selectedLaunchpad, fetchLaunchpadById, selectedLaunchpadId } = useLaunchStore();
   const location = useLocation();
-  const [permissionRequested, setPermissionRequested] = useState(false);
 
   useEffect(() => {
     if (selectedLaunchpadId) {
@@ -53,29 +51,6 @@ export default function MapScreen() {
       </View>
     );
   }
-
-  const requestLocationPermission = async () => {
-    try {
-      if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Permission',
-            message:
-              'This app needs access to your location to show you where you are relative to the launchpad.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          },
-        );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          setPermissionRequested(true);
-        }
-      }
-    } catch (err) {
-      console.warn(err);
-    }
-  };
 
   const openDirections = () => {
     if (!selectedLaunchpad) return;
@@ -166,34 +141,6 @@ export default function MapScreen() {
           )}
         </View>
 
-        {location.denied && !permissionRequested && (
-          <View style={styles.permissionCard}>
-            <View style={styles.permissionHeader}>
-              <Ionicons name="location" size={20} color={COLORS.error} />
-              <Text style={styles.permissionTitle}>Location Access Required</Text>
-            </View>
-            <Text style={styles.permissionText}>
-              Enable location permissions to see your position and calculate distance to the
-              launchpad.
-            </Text>
-            <TouchableOpacity style={styles.permissionButton} onPress={requestLocationPermission}>
-              <Text style={styles.permissionButtonText}>Enable Location</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {location.loading && !location.coords && !location.denied && (
-          <View style={styles.permissionCard}>
-            <View style={styles.permissionHeader}>
-              <ActivityIndicator size="small" color={COLORS.primary} />
-              <Text style={styles.permissionTitle}>Getting Your Location</Text>
-            </View>
-            <Text style={styles.permissionText}>
-              Please wait while we determine your current location...
-            </Text>
-          </View>
-        )}
-
         <TouchableOpacity style={styles.fab} onPress={openDirections}>
           <Ionicons name="navigate" size={26} color={COLORS.white} />
         </TouchableOpacity>
@@ -266,45 +213,6 @@ const styles = StyleSheet.create({
   distanceText: {
     fontSize: TYPOGRAPHY.size.sm,
     color: COLORS.primary,
-    fontWeight: TYPOGRAPHY.weight.medium,
-  },
-  permissionCard: {
-    position: 'absolute',
-    bottom: SPACING.xl + 160,
-    left: SPACING.md,
-    right: SPACING.md,
-    padding: SPACING.lg,
-    backgroundColor: COLORS.card,
-    borderRadius: BORDER_RADIUS.md,
-    ...SHADOWS.md,
-  },
-  permissionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-  },
-  permissionTitle: {
-    fontSize: TYPOGRAPHY.size.sm,
-    fontWeight: TYPOGRAPHY.weight.semibold,
-    color: COLORS.error,
-    marginLeft: SPACING.sm,
-  },
-  permissionText: {
-    fontSize: TYPOGRAPHY.size.sm,
-    color: COLORS.textSecondary,
-    lineHeight: TYPOGRAPHY.size.sm * TYPOGRAPHY.lineHeight.normal,
-    marginBottom: SPACING.md,
-  },
-  permissionButton: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: BORDER_RADIUS.md,
-    alignSelf: 'flex-start',
-  },
-  permissionButtonText: {
-    color: COLORS.white,
-    fontSize: TYPOGRAPHY.size.sm,
     fontWeight: TYPOGRAPHY.weight.medium,
   },
   fab: {

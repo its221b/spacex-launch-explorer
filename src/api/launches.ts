@@ -1,6 +1,6 @@
 import client from './client';
 import { Launch, Launchpad } from './types';
-import { logError, logInfo } from '../utils/logger';
+import { logError } from '../utils/logger';
 import axios from 'axios';
 
 const launchpadClient = axios.create({
@@ -26,8 +26,6 @@ export const getLaunches = async (
   limit: number = 10,
 ): Promise<PaginatedLaunchesResponse> => {
   try {
-    logInfo(`Fetching launches page ${page} with limit ${limit}`);
-
     const offset = (page - 1) * limit;
 
     const res = await client.get(
@@ -35,10 +33,14 @@ export const getLaunches = async (
     );
     const data = res.data;
 
-    const hasNextPage = Array.isArray(data) && data.length === limit;
+    // Check if we're getting more data than requested (API ignoring limit)
+    const hasNextPage = data.length > limit;
+
+    // If API is ignoring limit, we need to manually paginate
+    const paginatedData = Array.isArray(data) ? data.slice(0, limit) : [];
 
     const result: PaginatedLaunchesResponse = {
-      docs: Array.isArray(data) ? data : [],
+      docs: paginatedData,
       hasNextPage,
       totalDocs: 0,
       totalPages: 0,
@@ -46,7 +48,6 @@ export const getLaunches = async (
       limit,
     };
 
-    logInfo(`Successfully fetched ${result.docs.length} launches (page ${page})`);
     return result;
   } catch (error) {
     logError('Failed to fetch launches from SpaceX API', error as Error);
@@ -56,10 +57,8 @@ export const getLaunches = async (
 
 export const getLaunchById = async (id: string): Promise<Launch> => {
   try {
-    logInfo(`Fetching launch details for ID: ${id}`);
     const res = await client.get(`/launches/${id}`);
     const launch = res.data as Launch;
-    logInfo(`Successfully fetched launch: ${launch.name}`);
     return launch;
   } catch (error) {
     logError(`Failed to fetch launch with ID: ${id}`, error as Error);
@@ -69,10 +68,8 @@ export const getLaunchById = async (id: string): Promise<Launch> => {
 
 export const getLaunchpadById = async (id: string): Promise<Launchpad> => {
   try {
-    logInfo(`Fetching launchpad details for ID: ${id}`);
     const res = await launchpadClient.get(`/launchpads/${id}`);
     const launchpad = res.data as Launchpad;
-    logInfo(`Successfully fetched launchpad: ${launchpad.name}`);
     return launchpad;
   } catch (error) {
     logError(`Failed to fetch launchpad with ID: ${id}`, error as Error);

@@ -45,8 +45,7 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
           const launchpadData = await getLaunchpadById(launchData.launchpad);
           setLaunchpad(launchpadData);
         }
-      } catch (error) {
-        console.error('Error fetching launch details:', error);
+      } catch {
         Alert.alert('Error', 'Failed to load launch details');
       } finally {
         setLoading(false);

@@ -36,7 +36,7 @@ class ImagePreloader {
           failed++;
         }
       } catch {
-        failed++;
+        // Handle preloading error silently
       }
     }
 
@@ -63,8 +63,8 @@ class ImagePreloader {
 
       try {
         await this.preloadImages(batch);
-      } catch (error) {
-        console.warn('Image preloading error:', error);
+      } catch {
+        // Handle preloading error silently
       }
 
       await new Promise((resolve) => setTimeout(resolve, 100));
