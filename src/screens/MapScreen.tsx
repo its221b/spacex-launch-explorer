@@ -260,35 +260,35 @@ export default function MapScreen() {
         )}
 
         {location.permissionStatus === 'granted' && location.loading && !location.coords && (
-          <View style={styles.permissionCardCentered}>
-            <View style={styles.permissionHeader}>
+          <View style={styles.loadingCard}>
+            <View style={styles.loadingHeader}>
               <ActivityIndicator size="small" color={COLORS.primary} />
-              <Text style={styles.permissionTitle}>Getting Your Location</Text>
+              <Text style={styles.loadingTitle}>Getting Your Location</Text>
             </View>
-            <Text style={styles.permissionText}>
+            <Text style={styles.loadingText}>
               Please wait while we determine your current location...
             </Text>
           </View>
         )}
 
         {location.permissionStatus === 'granted' && location.error && !location.coords && (
-          <View style={styles.permissionCardCentered}>
-            <View style={styles.permissionHeader}>
+          <View style={styles.errorCard}>
+            <View style={styles.errorHeader}>
               <Ionicons name="location" size={20} color={COLORS.warning} />
-              <Text style={styles.permissionTitle}>Location Error</Text>
+              <Text style={styles.errorTitle}>Location Error</Text>
             </View>
-            <Text style={styles.permissionText}>
+            <Text style={styles.errorText}>
               {location.error}. Please try again or check your location settings.
             </Text>
-            <View style={styles.permissionButtonContainer}>
-              <TouchableOpacity style={styles.permissionButton} onPress={location.refreshLocation}>
-                <Text style={styles.permissionButtonText}>Try Again</Text>
+            <View style={styles.errorButtonContainer}>
+              <TouchableOpacity style={styles.errorButton} onPress={location.refreshLocation}>
+                <Text style={styles.errorButtonText}>Try Again</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.permissionButton, styles.settingsButton]}
+                style={[styles.errorButton, styles.settingsButton]}
                 onPress={location.openSettings}
               >
-                <Text style={styles.permissionButtonText}>Open Settings</Text>
+                <Text style={styles.errorButtonText}>Open Settings</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -316,6 +316,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
     fontSize: TYPOGRAPHY.size.base,
     color: COLORS.textSecondary,
+    textAlign: 'center',
   },
   loadingSubtext: {
     marginTop: SPACING.xs,
@@ -431,5 +432,82 @@ const styles = StyleSheet.create({
   },
   settingsButton: {
     backgroundColor: COLORS.secondary,
+  },
+  loadingCard: {
+    position: 'absolute',
+    top: '50%',
+    left: SPACING.lg,
+    right: SPACING.lg,
+    padding: SPACING.lg,
+    backgroundColor: COLORS.card,
+    borderRadius: BORDER_RADIUS.md,
+    ...SHADOWS.md,
+    marginTop: SPACING.md,
+    alignItems: 'center',
+    transform: [{ translateY: -100 }],
+  },
+  loadingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
+  loadingTitle: {
+    fontSize: TYPOGRAPHY.size.lg,
+    fontWeight: TYPOGRAPHY.weight.semibold,
+    marginLeft: SPACING.sm,
+    color: COLORS.textPrimary,
+  },
+  errorCard: {
+    position: 'absolute',
+    top: '50%',
+    left: SPACING.lg,
+    right: SPACING.lg,
+    padding: SPACING.lg,
+    backgroundColor: COLORS.card,
+    borderRadius: BORDER_RADIUS.md,
+    ...SHADOWS.md,
+    marginTop: SPACING.md,
+    alignItems: 'center',
+    transform: [{ translateY: -100 }],
+  },
+  errorHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
+  errorTitle: {
+    fontSize: TYPOGRAPHY.size.lg,
+    fontWeight: TYPOGRAPHY.weight.semibold,
+    marginLeft: SPACING.sm,
+    color: COLORS.textPrimary,
+  },
+  errorText: {
+    fontSize: TYPOGRAPHY.size.sm,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.sm,
+    textAlign: 'center',
+  },
+  errorButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: SPACING.sm,
+    width: '100%',
+    gap: SPACING.xs,
+  },
+  errorButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: BORDER_RADIUS.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.sm,
+    alignItems: 'center',
+    marginTop: SPACING.sm,
+    minWidth: 80,
+    flex: 1,
+  },
+  errorButtonText: {
+    color: COLORS.white,
+    fontSize: TYPOGRAPHY.size.sm,
+    fontWeight: TYPOGRAPHY.weight.semibold,
+    textAlign: 'center',
   },
 });

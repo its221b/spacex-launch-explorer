@@ -13,7 +13,10 @@ export default function RootStack() {
       <Stack.Screen
         name="LaunchDetail"
         component={LaunchDetailScreen}
-        options={{ title: 'Launch Details' }}
+        options={{
+          title: 'Launch Details',
+          headerBackTitle: 'Launches',
+        }}
       />
     </Stack.Navigator>
   );
