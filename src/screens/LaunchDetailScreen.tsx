@@ -109,7 +109,7 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
             
             {!hasError && (
               <Image 
-                source={{ uri: optimizedUrl || launch.links.patch.large }} 
+                source={{ uri: optimizedUrl || launch.links?.patch?.large }} 
                 style={[styles.patch, { opacity: isLoaded ? 1 : 0.3 }]}
                 fadeDuration={300}
                 resizeMode="contain"

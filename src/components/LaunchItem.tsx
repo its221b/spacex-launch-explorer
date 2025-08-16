@@ -19,6 +19,7 @@ type Props = {
 
 const LaunchItem = memo(({ launch }: Props) => {
   const navigation = useNavigation<any>();
+  
   const status = getLaunchStatus(launch);
   const statusStyle = getLaunchStatusStyle(status);
 
@@ -38,7 +39,7 @@ const LaunchItem = memo(({ launch }: Props) => {
     <TouchableOpacity style={styles.container} onPress={handlePress} activeOpacity={0.7}>
       <View style={styles.content}>
         <View style={styles.imageContainer}>
-          {optimizedUrl ? (
+          {(launch.links?.patch?.small || launch.links?.patch?.large) && optimizedUrl ? (
             <View style={styles.imageWrapper}>
               <Image
                 source={{
