@@ -46,9 +46,6 @@ const LaunchItem = memo(({ launch }: Props) => {
                   cache: 'force-cache',
                 }}
                 style={[styles.image, { opacity: isLoaded ? 1 : 0.3 }]}
-                onLoadStart={() => {}}
-                onLoadEnd={() => {}}
-                onError={() => {}}
                 fadeDuration={300}
                 resizeMode="contain"
               />

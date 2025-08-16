@@ -11,24 +11,36 @@ interface LogEntry {
 class Logger {
   private logs: LogEntry[] = [];
   private maxLogs = 50;
-  private isProcessing = false;
+  private isProduction = !__DEV__;
+  private logLevel: LogLevel = this.isProduction ? 'error' : 'debug';
+
+  private shouldLog(level: LogLevel): boolean {
+    if (this.isProduction) {
+      return level === 'error';
+    }
+    return true;
+  }
 
   private log(level: LogLevel, message: string, data?: any, error?: Error) {
-    const entry: LogEntry = {
-      timestamp: new Date().toISOString(),
-      level,
-      message,
-      data,
-      error,
-    };
-
-    this.logs.push(entry);
-
-    if (this.logs.length > this.maxLogs) {
-      this.logs = this.logs.slice(-this.maxLogs);
+    if (!this.shouldLog(level)) {
+      return;
     }
 
     if (__DEV__) {
+      const entry: LogEntry = {
+        timestamp: new Date().toISOString(),
+        level,
+        message,
+        data,
+        error,
+      };
+
+      this.logs.push(entry);
+
+      if (this.logs.length > this.maxLogs) {
+        this.logs = this.logs.slice(-this.maxLogs);
+      }
+
       const prefix = `[${level.toUpperCase()}]`;
       switch (level) {
         case 'error':
@@ -42,6 +54,10 @@ class Logger {
           break;
         default:
           console.log(prefix, message, data);
+      }
+    } else {
+      if (level === 'error') {
+        console.error(`[ERROR] ${message}`, error);
       }
     }
   }
@@ -63,11 +79,21 @@ class Logger {
   }
 
   getLogs(): LogEntry[] {
-    return [...this.logs];
+    return __DEV__ ? [...this.logs] : [];
   }
 
   clearLogs() {
-    this.logs = [];
+    if (__DEV__) {
+      this.logs = [];
+    }
+  }
+
+  setLogLevel(level: LogLevel) {
+    this.logLevel = level;
+  }
+
+  getLogLevel(): LogLevel {
+    return this.logLevel;
   }
 }
 

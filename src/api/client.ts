@@ -4,7 +4,16 @@ import { getNetworkErrorMessage } from '../utils/networkUtils';
 
 const client = axios.create({
   baseURL: 'https://api.spacexdata.com/v5',
-  timeout: 30000,
+  timeout: 15000,
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  },
+});
+
+export const v4Client = axios.create({
+  baseURL: 'https://api.spacexdata.com/v4',
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',

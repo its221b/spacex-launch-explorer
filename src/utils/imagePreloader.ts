@@ -1,103 +1,79 @@
 import { Image } from 'react-native';
+import { logError } from './logger';
+
+interface PreloadItem {
+  url: string;
+  priority: number;
+  timestamp: number;
+}
 
 class ImagePreloader {
-  private preloadedImages: Set<string> = new Set();
-  private preloadQueue: string[] = [];
+  private preloadQueue: PreloadItem[] = [];
   private isProcessing = false;
-  private batchSize = 5;
+  private maxConcurrent = 3;
+  private activePreloads = 0;
 
-  preloadImage(url: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      if (this.preloadedImages.has(url)) {
-        resolve(true);
-        return;
-      }
+  queueForPreload(url: string, priority: number = 1): void {
+    if (!url || this.preloadQueue.some(item => item.url === url)) {
+      return;
+    }
 
-      Image.prefetch(url)
-        .then(() => {
-          this.preloadedImages.add(url);
-          resolve(true);
-        })
-        .catch(() => {
-          resolve(false);
-        });
+    this.preloadQueue.push({
+      url,
+      priority,
+      timestamp: Date.now(),
     });
-  }
 
-  async preloadImages(urls: string[]): Promise<{ success: number; failed: number }> {
-    let success = 0;
-    let failed = 0;
-
-    const uniqueUrls = urls.filter((url) => !this.preloadedImages.has(url));
-
-    if (uniqueUrls.length === 0) {
-      return { success: urls.length, failed: 0 };
-    }
-
-    for (const url of uniqueUrls) {
-      try {
-        const result = await this.preloadImage(url);
-        if (result) {
-          success++;
-        } else {
-          failed++;
-        }
-      } catch {
-        failed++;
+    this.preloadQueue.sort((a, b) => {
+      if (a.priority !== b.priority) {
+        return b.priority - a.priority;
       }
-    }
+      return a.timestamp - b.timestamp;
+    });
 
-    return { success: success + (urls.length - uniqueUrls.length), failed };
-  }
-
-  queueForPreload(urls: string[]): void {
-    const uniqueUrls = urls.filter((url) => !this.preloadedImages.has(url));
-    this.preloadQueue.push(...uniqueUrls);
-
-    if (!this.isProcessing) {
-      this.processQueue();
-    }
+    this.processQueue();
   }
 
   private async processQueue(): Promise<void> {
-    if (this.isProcessing || this.preloadQueue.length === 0) {
+    if (this.isProcessing || this.activePreloads >= this.maxConcurrent) {
       return;
     }
 
     this.isProcessing = true;
 
-    while (this.preloadQueue.length > 0) {
-      const batch = this.preloadQueue.splice(0, this.batchSize);
-
-      try {
-        await this.preloadImages(batch);
-      } catch {
-        // Handle preloading error silently
+    while (this.preloadQueue.length > 0 && this.activePreloads < this.maxConcurrent) {
+      const item = this.preloadQueue.shift();
+      if (item) {
+        this.activePreloads++;
+        this.preloadImage(item.url).finally(() => {
+          this.activePreloads--;
+          this.processQueue();
+        });
       }
-
-      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     this.isProcessing = false;
   }
 
-  isPreloaded(url: string): boolean {
-    return this.preloadedImages.has(url);
+  private async preloadImage(url: string): Promise<void> {
+    try {
+      await Image.prefetch(url);
+    } catch (error) {
+      logError(`Failed to preload image: ${url}`, error as Error);
+    }
   }
 
-  clearCache(): void {
-    this.preloadedImages.clear();
+  clearQueue(): void {
     this.preloadQueue = [];
   }
 
-  getCacheStats(): { preloaded: number; queued: number } {
-    return {
-      preloaded: this.preloadedImages.size,
-      queued: this.preloadQueue.length,
-    };
+  getQueueLength(): number {
+    return this.preloadQueue.length;
+  }
+
+  getActivePreloads(): number {
+    return this.activePreloads;
   }
 }
 
 export const imagePreloader = new ImagePreloader();
-
-export { ImagePreloader };

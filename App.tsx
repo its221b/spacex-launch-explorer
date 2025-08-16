@@ -7,7 +7,11 @@ import { validateEnvironment } from './src/config/env';
 
 export default function App() {
   useEffect(() => {
-    validateEnvironment();
+    try {
+      validateEnvironment();
+    } catch (error) {
+      console.warn('Environment validation failed:', error);
+    }
   }, []);
 
   return (

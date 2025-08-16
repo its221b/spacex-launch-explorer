@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useRef, useCallback } from 'react';
-import { Platform, StyleSheet, Text, View, TouchableOpacity, Linking, Alert } from 'react-native';
+import React, { useRef, useMemo, useCallback, useEffect } from 'react';
+import { View, Text, StyleSheet, Platform, TouchableOpacity, Linking, Alert } from 'react-native';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../utils/constants';
 import { Ionicons } from '@expo/vector-icons';
+import { logError } from '../utils/logger';
 
 let MapView: any = null;
 let Marker: any = null;
@@ -12,7 +13,12 @@ try {
   MapView = mapsModule.default;
   Marker = mapsModule.Marker;
   PROVIDER_GOOGLE = mapsModule.PROVIDER_GOOGLE;
-} catch {}
+} catch (error) {
+  logError('Failed to load React Native Maps module', error as Error);
+  MapView = null;
+  Marker = null;
+  PROVIDER_GOOGLE = null;
+}
 
 type LaunchpadMarker = {
   latitude: number;
@@ -130,7 +136,8 @@ export default function MapViewComponent({
                   ? `http://maps.apple.com/?q=${launchpad.latitude},${launchpad.longitude}`
                   : `https://www.google.com/maps?q=${launchpad.latitude},${launchpad.longitude}`;
 
-              Linking.openURL(url).catch(() => {
+              Linking.openURL(url).catch((error) => {
+                logError('Failed to open Maps app', error as Error);
                 Alert.alert('Error', 'Could not open Maps app');
               });
             }}

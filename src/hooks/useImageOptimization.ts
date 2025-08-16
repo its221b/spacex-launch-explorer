@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Image } from 'react-native';
+import { logError } from '../utils/logger';
 
 interface UseImageOptimizationProps {
   imageUrl: string | null;
@@ -41,7 +42,8 @@ export const useImageOptimization = ({
     try {
       await Image.prefetch(url);
       return true;
-    } catch {
+    } catch (error) {
+      logError(`Failed to preload image: ${url}`, error as Error);
       return false;
     }
   }, []);
@@ -54,7 +56,7 @@ export const useImageOptimization = ({
   useEffect(() => {
     if (imageUrl) {
       const optimized = memoizedOptimizedUrl;
-      if (optimized !== optimizedUrl) {
+      if (optimized !== optimizedUrl && optimized) {
         setOptimizedUrl(optimized);
         setIsLoading(true);
         setHasError(false);

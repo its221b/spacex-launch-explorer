@@ -1,16 +1,21 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { Platform, Linking, AppState } from 'react-native';
 import * as Location from 'expo-location';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { AppState, Linking, Platform } from 'react-native';
+import { logError } from '../utils/logger';
 
-type PermissionStatus = 'undetermined' | 'granted' | 'denied' | 'blocked';
-type Coords = { latitude: number; longitude: number } | null;
+type PermissionStatus = 'granted' | 'denied' | 'blocked' | 'undetermined';
 
-export default function useLocation() {
-  const [coords, setCoords] = useState<Coords>(null);
-  const [permissionStatus, setPermissionStatus] = useState<PermissionStatus>('undetermined');
+interface LocationCoords {
+  latitude: number;
+  longitude: number;
+}
+
+export const useLocation = () => {
+  const [coords, setCoords] = useState<LocationCoords | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const lastUpdateTime = useRef<number>(0);
+  const [permissionStatus, setPermissionStatus] = useState<PermissionStatus>('undetermined');
+  const lastUpdateTime = useRef(0);
   const appStateRef = useRef<string>(AppState.currentState);
 
   const checkPermissionStatus = useCallback(async (): Promise<PermissionStatus> => {
@@ -28,7 +33,8 @@ export default function useLocation() {
 
       setPermissionStatus(permissionStatus);
       return permissionStatus;
-    } catch {
+    } catch (error) {
+      logError('Failed to check location permission status', error as Error);
       setPermissionStatus('denied');
       setError('Failed to check permission status');
       return 'denied';
@@ -77,7 +83,8 @@ export default function useLocation() {
       });
       lastUpdateTime.current = now;
       setError(null);
-    } catch {
+    } catch (error) {
+      logError('Failed to get current location', error as Error);
       setError('Failed to get current location. Please check your location settings.');
     } finally {
       setLoading(false);
@@ -111,10 +118,10 @@ export default function useLocation() {
         setPermissionStatus('denied');
         setError('Location permission denied');
       }
-    } catch {
+    } catch (error) {
+      logError('Failed to request location permission', error as Error);
       setPermissionStatus('denied');
       setError('Failed to request location permission');
-      throw new Error('Failed to request location permission');
     } finally {
       setLoading(false);
     }
@@ -176,4 +183,4 @@ export default function useLocation() {
     forceRefreshPermissions,
     openSettings,
   };
-}
+};

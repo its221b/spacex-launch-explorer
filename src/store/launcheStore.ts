@@ -32,160 +32,90 @@ type Actions = {
   clearSelectedLaunchpadId: () => void;
 };
 
-export const useLaunchStore = create<State & Actions>((set, get) => {
-  const ensureUniqueLaunches = (launches: Launch[]): Launch[] => {
-    const seen = new Set();
-    return launches.filter((launch) => {
-      if (seen.has(launch.id)) {
-        return false;
-      }
-      seen.add(launch.id);
-      return true;
-    });
-  };
+export const useLaunchStore = create<State & Actions>((set, get) => ({
+  launches: [],
+  originalLaunches: [],
+  hasNextPage: false,
+  loading: false,
+  loadingMore: false,
+  refreshing: false,
+  error: null,
+  retryCount: 0,
+  maxRetries: 3,
+  searchQuery: '',
+  currentPage: 1,
+  selectedLaunchpad: null,
+  selectedLaunchpadId: null,
 
-  const paginateLaunches = (allLaunches: Launch[], page: number, limit: number) => {
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const pageData = allLaunches.slice(startIndex, endIndex);
-    const hasNextPage = endIndex < allLaunches.length;
+  initLaunches: async () => {
+    const { retryCount, maxRetries } = get();
+    if (retryCount >= maxRetries) {
+      set({ error: 'Maximum retry attempts reached. Please check your connection.' });
+      return;
+    }
 
-    return { pageData, hasNextPage, totalLaunches: allLaunches.length };
-  };
+    set({ loading: true, error: null });
 
-  return {
-    launches: [],
-    originalLaunches: [],
-    hasNextPage: false,
-    loading: true,
-    loadingMore: false,
-    refreshing: false,
-    error: null,
-    retryCount: 0,
-    maxRetries: 3,
-    searchQuery: '',
-    currentPage: 1,
-    selectedLaunchpad: null,
-    selectedLaunchpadId: null,
+    try {
+      const data = await getLaunches(1, 1000);
+      const allLaunches = ensureUniqueLaunches(data.docs);
+      const { pageData, hasNextPage: hasMore } = paginateLaunches(allLaunches, 1, 10);
 
-    initLaunches: async () => {
-      const { launches: currentLaunches, searchQuery, hasNextPage } = get();
+      set({
+        launches: pageData,
+        originalLaunches: allLaunches,
+        hasNextPage: hasMore,
+        loading: false,
+        retryCount: 0,
+        currentPage: 1,
+      });
+    } catch (error: any) {
+      const newRetryCount = retryCount + 1;
+      logError('Failed to fetch launches', error as Error);
+      set({
+        error: 'Failed to load launches. Please check your connection and try again.',
+        loading: false,
+        retryCount: newRetryCount,
+      });
+    }
+  },
 
-      if (currentLaunches.length > 0 && !searchQuery && hasNextPage !== false) return;
+  loadMore: async () => {
+    const { currentPage, originalLaunches, hasNextPage } = get();
+    if (!hasNextPage || get().loadingMore) return;
 
-      set({ loading: true, error: null, currentPage: 1 });
-      try {
-        const data = await getLaunches(1, 1000);
-        const allLaunches = ensureUniqueLaunches(data.docs);
-        const { pageData, hasNextPage: hasMore } = paginateLaunches(allLaunches, 1, 10);
+    set({ loadingMore: true });
 
-        set({
-          launches: pageData,
-          originalLaunches: allLaunches,
+    try {
+      const nextPage = currentPage + 1;
+      const { pageData, hasNextPage: hasMore } = paginateLaunches(originalLaunches, nextPage, 10);
+
+      if (pageData.length > 0) {
+        set((state) => ({
+          launches: [...state.launches, ...pageData],
           hasNextPage: hasMore,
-          loading: false,
-          retryCount: 0,
-          currentPage: 1,
-        });
-      } catch (error: any) {
-        const { retryCount, maxRetries } = get();
-        const newRetryCount = retryCount + 1;
-
-        if (newRetryCount <= maxRetries) {
-          set({
-            retryCount: newRetryCount,
-            loading: false,
-            error: `Failed to fetch launches. Retrying... (${newRetryCount}/${maxRetries})`,
-          });
-
-          setTimeout(() => {
-            get().initLaunches();
-          }, 2000);
-        } else {
-          const errorMessage =
-            error.message || 'Failed to fetch launches. Please check your internet connection.';
-          set({
-            error: errorMessage,
-            loading: false,
-            retryCount: 0,
-          });
-        }
+          loadingMore: false,
+          currentPage: nextPage,
+        }));
+      } else {
+        set({ hasNextPage: false, loadingMore: false });
       }
-    },
+    } catch (error: any) {
+      logError('Failed to load more launches', error as Error);
+      set({ loadingMore: false });
+    }
+  },
 
-    loadMore: async () => {
-      const { loadingMore, hasNextPage, currentPage, searchQuery, originalLaunches } = get();
+  searchLaunches: async (query: string) => {
+    const originalLaunches = get().originalLaunches;
+    const currentSearchQuery = get().searchQuery;
+    const searchTerm = query.toLowerCase().trim();
 
-      if (loadingMore || !hasNextPage || searchQuery.trim()) {
-        return;
-      }
+    if (currentSearchQuery === query) {
+      return;
+    }
 
-      set({ loadingMore: true });
-      try {
-        const nextPage = currentPage + 1;
-        const { pageData, hasNextPage: hasMore } = paginateLaunches(originalLaunches, nextPage, 10);
-
-        if (pageData.length > 0) {
-          set((state) => ({
-            launches: [...state.launches, ...pageData],
-            hasNextPage: hasMore,
-            loadingMore: false,
-            currentPage: nextPage,
-          }));
-        } else {
-          set({ hasNextPage: false, loadingMore: false });
-        }
-      } catch (error: any) {
-        logError('Failed to load more launches', error as Error);
-        set({ loadingMore: false });
-      }
-    },
-
-    searchLaunches: async (query: string) => {
-      const originalLaunches = get().originalLaunches;
-      const currentSearchQuery = get().searchQuery;
-      const searchTerm = query.toLowerCase().trim();
-
-      if (currentSearchQuery === query) {
-        return;
-      }
-
-      if (!searchTerm) {
-        set({
-          launches: originalLaunches,
-          searchQuery: '',
-          currentPage: 1,
-          loading: false,
-          error: null,
-          hasNextPage: get().hasNextPage,
-        });
-        return;
-      }
-
-      set({ loading: true, error: null, searchQuery: query, currentPage: 1 });
-
-      try {
-        const filteredLaunches = originalLaunches.filter((launch) =>
-          launch.name.toLowerCase().includes(searchTerm),
-        );
-
-        set({
-          launches: filteredLaunches,
-          hasNextPage: false,
-          loading: false,
-          retryCount: 0,
-          currentPage: 1,
-        });
-      } catch (error: any) {
-        const errorMessage = 'Search failed. Please try again.';
-        logError(errorMessage, error as Error);
-        set({ error: errorMessage, loading: false });
-      }
-    },
-
-    clearSearch: async () => {
-      const originalLaunches = get().originalLaunches;
-
+    if (!searchTerm) {
       set({
         launches: originalLaunches,
         searchQuery: '',
@@ -194,54 +124,138 @@ export const useLaunchStore = create<State & Actions>((set, get) => {
         error: null,
         hasNextPage: get().hasNextPage,
       });
-    },
+      return;
+    }
 
-    retryLaunches: async () => {
-      set({ retryCount: 0, error: null });
-      await get().initLaunches();
-    },
+    set({ loading: true, error: null, searchQuery: query, currentPage: 1 });
 
-    refreshLaunches: async () => {
-      set({ refreshing: true, error: null });
-      try {
-        const data = await getLaunches(1, 1000);
-        const allLaunches = ensureUniqueLaunches(data.docs);
-        const { pageData, hasNextPage: hasMore } = paginateLaunches(allLaunches, 1, 10);
+    try {
+      const filteredLaunches = originalLaunches.filter((launch) =>
+        launch.name.toLowerCase().includes(searchTerm),
+      );
 
-        set({
-          launches: pageData,
-          originalLaunches: allLaunches,
-          hasNextPage: hasMore,
-          refreshing: false,
-          retryCount: 0,
-          currentPage: 1,
-        });
-      } catch (error: any) {
-        logError('Failed to refresh launches', error as Error);
-        set({ refreshing: false, error: 'Failed to refresh launches' });
+      set({
+        launches: filteredLaunches,
+        hasNextPage: false,
+        loading: false,
+        retryCount: 0,
+        currentPage: 1,
+      });
+    } catch (error: any) {
+      const errorMessage = 'Search failed. Please try again.';
+      logError(errorMessage, error as Error);
+      set({ error: errorMessage, loading: false });
+    }
+  },
+
+  clearSearch: async () => {
+    const originalLaunches = get().originalLaunches;
+
+    set({
+      launches: originalLaunches,
+      searchQuery: '',
+      currentPage: 1,
+      loading: false,
+      error: null,
+      hasNextPage: get().hasNextPage,
+    });
+  },
+
+  retryLaunches: async () => {
+    set({ retryCount: 0, error: null });
+    await get().initLaunches();
+  },
+
+  refreshLaunches: async () => {
+    set({ refreshing: true, error: null });
+    try {
+      const data = await getLaunches(1, 1000);
+      const allLaunches = ensureUniqueLaunches(data.docs);
+      const { pageData, hasNextPage: hasMore } = paginateLaunches(allLaunches, 1, 10);
+
+      set({
+        launches: pageData,
+        originalLaunches: allLaunches,
+        hasNextPage: hasMore,
+        refreshing: false,
+        retryCount: 0,
+        currentPage: 1,
+      });
+    } catch (error: any) {
+      logError('Failed to refresh launches', error as Error);
+      set({ refreshing: false, error: 'Failed to refresh launches' });
+    }
+  },
+
+  fetchLaunchpadById: async (id: string) => {
+    try {
+      const pad = await getLaunchpadById(id);
+      if (pad && typeof pad.latitude === 'number' && typeof pad.longitude === 'number') {
+        set({ selectedLaunchpad: pad, error: null });
+      } else {
+        const errorMessage = 'Launchpad data is incomplete or missing coordinates.';
+        logError(errorMessage, undefined, { launchpadId: id, launchpad: pad });
+        set({ error: errorMessage, selectedLaunchpad: null });
       }
-    },
-
-    fetchLaunchpadById: async (id: string) => {
-      try {
-        const pad = await getLaunchpadById(id);
-        if (pad && typeof pad.latitude === 'number' && typeof pad.longitude === 'number') {
-          set({ selectedLaunchpad: pad });
+    } catch (error: any) {
+      let errorMessage = 'Failed to load launchpad.';
+      
+      if (error.message) {
+        if (error.message.includes('Launchpad not found')) {
+          errorMessage = `Launchpad not found: ${id}`;
+        } else if (error.message.includes('Failed to fetch launchpad')) {
+          errorMessage = error.message;
+        } else if (error.message.includes('Network Error')) {
+          errorMessage = 'Network connection error. Please check your internet connection.';
+        } else if (error.message.includes('timeout')) {
+          errorMessage = 'Request timed out. Please try again.';
         } else {
-          const errorMessage = 'Launchpad not found or missing coordinates.';
-          logError(errorMessage);
-          set({ error: errorMessage });
+          errorMessage = error.message;
         }
-      } catch (error: any) {
-        const errorMessage =
-          error.message || 'Failed to load launchpad. Please check your internet connection.';
-        logError(errorMessage, error as Error);
-        set({ error: errorMessage });
+      } else if (error.response?.status) {
+        const status = error.response.status;
+        if (status === 404) {
+          errorMessage = `Launchpad not found: ${id}`;
+        } else if (status === 429) {
+          errorMessage = 'Too many requests. Please wait a moment and try again.';
+        } else if (status >= 500) {
+          errorMessage = 'Server error. Please try again later.';
+        } else {
+          errorMessage = `Request failed with status ${status}`;
+        }
       }
-    },
+      
+      logError(`Failed to fetch launchpad with ID: ${id}`, error as Error, { 
+        errorMessage, 
+        statusCode: error.response?.status,
+        responseData: error.response?.data 
+      });
+      
+      set({ error: errorMessage, selectedLaunchpad: null });
+    }
+  },
 
-    setSelectedLaunchpadId: (id) => set({ selectedLaunchpadId: id }),
-    clearSelectedLaunchpadId: () => set({ selectedLaunchpadId: null, selectedLaunchpad: null }),
-    clearError: () => set({ error: null, retryCount: 0 }),
-  };
-});
+  setSelectedLaunchpadId: (id) => set({ selectedLaunchpadId: id }),
+  clearSelectedLaunchpadId: () => set({ selectedLaunchpadId: null, selectedLaunchpad: null }),
+  clearError: () => set({ error: null, retryCount: 0 }),
+}));
+
+const ensureUniqueLaunches = (launches: Launch[]): Launch[] => {
+  const seen = new Set();
+  return launches.filter((launch) => {
+    if (seen.has(launch.id)) {
+      return false;
+    }
+    seen.add(launch.id);
+    return true;
+  });
+};
+
+const paginateLaunches = (launches: Launch[], page: number, limit: number) => {
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const pageData = launches.slice(startIndex, endIndex);
+  const hasNextPage = endIndex < launches.length;
+
+  return { pageData, hasNextPage };
+};

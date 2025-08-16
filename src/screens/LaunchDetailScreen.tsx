@@ -1,29 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   ScrollView,
   Image,
   TouchableOpacity,
-  Linking,
   StyleSheet,
   Alert,
+  Linking,
+  ActivityIndicator,
 } from 'react-native';
-
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
-import { Launch, Launchpad } from '../api/types';
-import { getLaunchById, getLaunchpadById } from '../api/launches';
-import { getLaunchStatus } from '../utils/commonUtils';
-import {
-  COLORS,
-  TYPOGRAPHY,
-  SPACING,
-  BORDER_RADIUS,
-  getLaunchStatusStyle,
-} from '../utils/constants';
 import { Ionicons } from '@expo/vector-icons';
 import { useLaunchStore } from '../store/launcheStore';
+import { logError } from '../utils/logger';
+import { getLaunchStatus } from '../utils/commonUtils';
+import { getLaunchById, getLaunchpadById } from '../api/launches';
+import { Launch, Launchpad } from '../api/types';
+import { RootStackParamList } from '../navigation/types';
+import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, getLaunchStatusStyle } from '../utils/constants';
+import { useImageOptimization } from '../hooks/useImageOptimization';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LaunchDetail'>;
 
@@ -33,6 +29,10 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
   const [launchpad, setLaunchpad] = useState<Launchpad | null>(null);
   const [loading, setLoading] = useState(true);
   const { setSelectedLaunchpadId } = useLaunchStore();
+
+  const { optimizedUrl, isLoading, hasError, isLoaded, retry } = useImageOptimization({
+    imageUrl: launch?.links?.patch?.large || null,
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,7 +45,8 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
           const launchpadData = await getLaunchpadById(launchData.launchpad);
           setLaunchpad(launchpadData);
         }
-      } catch {
+      } catch (error) {
+        logError('Failed to load launch details', error as Error);
         Alert.alert('Error', 'Failed to load launch details');
       } finally {
         setLoading(false);
@@ -57,7 +58,8 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
 
   const openWikipedia = () => {
     if (launch?.links?.wikipedia) {
-      Linking.openURL(launch.links.wikipedia).catch(() => {
+      Linking.openURL(launch.links.wikipedia).catch((error) => {
+        logError('Failed to open Wikipedia link', error as Error);
         Alert.alert('Error', 'Could not open Wikipedia');
       });
     }
@@ -90,7 +92,29 @@ export default function LaunchDetailScreen({ route, navigation }: Props) {
       >
         {launch.links?.patch?.large && (
           <View style={styles.patchContainer}>
-            <Image source={{ uri: launch.links.patch.large }} style={styles.patch} />
+            {isLoading && !isLoaded && (
+              <View style={styles.imageLoadingContainer}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+                <Text style={styles.imageLoadingText}>Loading image...</Text>
+              </View>
+            )}
+            
+            {hasError && (
+              <TouchableOpacity style={styles.imageErrorContainer} onPress={retry}>
+                <Ionicons name="refresh" size={32} color={COLORS.error} />
+                <Text style={styles.imageErrorText}>Image failed to load</Text>
+                <Text style={styles.imageRetryText}>Tap to retry</Text>
+              </TouchableOpacity>
+            )}
+            
+            {!hasError && (
+              <Image 
+                source={{ uri: optimizedUrl || launch.links.patch.large }} 
+                style={[styles.patch, { opacity: isLoaded ? 1 : 0.3 }]}
+                fadeDuration={300}
+                resizeMode="contain"
+              />
+            )}
           </View>
         )}
 
@@ -206,6 +230,46 @@ const styles = StyleSheet.create({
     width: SPACING.xl * 10,
     height: SPACING.xl * 10,
     borderRadius: BORDER_RADIUS.lg,
+  },
+  imageLoadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.lg,
+    zIndex: 1,
+  },
+  imageLoadingText: {
+    marginTop: SPACING.sm,
+    fontSize: TYPOGRAPHY.size.sm,
+    color: COLORS.textSecondary,
+  },
+  imageErrorContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.lg,
+    zIndex: 1,
+  },
+  imageErrorText: {
+    marginTop: SPACING.sm,
+    fontSize: TYPOGRAPHY.size.sm,
+    color: COLORS.error,
+    textAlign: 'center',
+  },
+  imageRetryText: {
+    marginTop: SPACING.xs,
+    fontSize: TYPOGRAPHY.size.xs,
+    color: COLORS.textSecondary,
   },
   infoContainer: {
     padding: SPACING.lg,

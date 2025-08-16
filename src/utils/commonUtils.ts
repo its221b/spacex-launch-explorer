@@ -23,3 +23,23 @@ export const getLaunchStatus = (launch: Launch): LaunchStatusType => {
 
   return LAUNCH_STATUS.UNKNOWN;
 };
+
+export const isValidLaunchpadId = (id: string): boolean => {
+  if (!id || typeof id !== 'string') {
+    return false;
+  }
+  
+  const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+  return objectIdRegex.test(id);
+};
+
+export const sanitizeLaunchpadId = (id: string): string | null => {
+  if (!id) return null;
+  
+  const sanitized = id.trim();
+  if (!isValidLaunchpadId(sanitized)) {
+    return null;
+  }
+  
+  return sanitized;
+};

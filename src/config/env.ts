@@ -18,7 +18,7 @@ export const validateEnvironment = (): void => {
   );
 
   if (missingVars.length > 0) {
-    // Environment variable not found, using default
+    console.warn(`Missing environment variables: ${missingVars.join(', ')}`);
   }
 };
 

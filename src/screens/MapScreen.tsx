@@ -13,10 +13,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useLaunchStore } from '../store/launcheStore';
 import MapViewComponent from '../components/MapViewComponent';
-import useLocation from '../hooks/useLocation';
+import { useLocation } from '../hooks/useLocation';
 import { haversineKm, formatDistanceWithPlural } from '../utils/distanceCalculator';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../utils/constants';
 import { Ionicons } from '@expo/vector-icons';
+import { logError } from '../utils/logger';
 
 export default function MapScreen() {
   const insets = useSafeAreaInsets();
@@ -77,7 +78,8 @@ export default function MapScreen() {
       url = `https://www.google.com/maps/dir/?api=1&destination=${latlng}&travelmode=driving`;
     }
 
-    Linking.openURL(url).catch(() => {
+    Linking.openURL(url).catch((error) => {
+      logError('Failed to open Maps app for navigation', error as Error);
       Alert.alert(
         'Navigation Error',
         'Could not open Maps app. Please make sure you have a maps application installed.',
@@ -99,7 +101,8 @@ export default function MapScreen() {
   const handleRetryPermission = useCallback(async () => {
     try {
       await location.requestLocationPermission();
-    } catch {
+    } catch (error) {
+      logError('Failed to request location permission in MapScreen', error as Error);
       location.openSettings();
     }
   }, [location]);
