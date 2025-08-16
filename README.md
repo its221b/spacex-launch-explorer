@@ -101,20 +101,22 @@ SpaceX Launch Explorer is a feature-rich mobile app that allows space enthusiast
 
 ## 📱 App Screenshots
 
-![Android](assets/android/1.jpg)
-![Android](assets/android/2.jpg)
-![Android](assets/android/3.jpg)
-![Android](assets/android/4.jpg)
-![Android](assets/android/5.jpg)
-![Android](assets/android/6.jpg)
+### Android Screenshots
+<img src="assets/android/1.jpg" width="200" alt="Android Screenshot 1">
+<img src="assets/android/2.jpg" width="200" alt="Android Screenshot 2">
+<img src="assets/android/3.jpg" width="200" alt="Android Screenshot 3">
+<img src="assets/android/4.jpg" width="200" alt="Android Screenshot 4">
+<img src="assets/android/5.jpg" width="200" alt="Android Screenshot 5">
+<img src="assets/android/6.jpg" width="200" alt="Android Screenshot 6">
 
-![iOS](assets/ios/1.jpg)
-![iOS](assets/ios/2.jpg)
-![iOS](assets/ios/3.jpg)
-![iOS](assets/ios/4.jpg)
-![iOS](assets/ios/5.jpg)
-![iOS](assets/ios/6.jpg)
-![iOS](assets/ios/7.jpg)
+### iOS Screenshots
+<img src="assets/ios/1.jpg" width="200" alt="iOS Screenshot 1">
+<img src="assets/ios/2.jpg" width="200" alt="iOS Screenshot 2">
+<img src="assets/ios/3.jpg" width="200" alt="iOS Screenshot 3">
+<img src="assets/ios/4.jpg" width="200" alt="iOS Screenshot 4">
+<img src="assets/ios/5.jpg" width="200" alt="iOS Screenshot 5">
+<img src="assets/ios/6.jpg" width="200" alt="iOS Screenshot 6">
+<img src="assets/ios/7.jpg" width="200" alt="iOS Screenshot 7">
 
 ## 🏗️ Project Structure
 
