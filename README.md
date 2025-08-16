@@ -101,25 +101,20 @@ SpaceX Launch Explorer is a feature-rich mobile app that allows space enthusiast
 
 ## 📱 App Screenshots
 
-### 1. Launches List
+![Android](assets/android/1.jpg)
+![Android](assets/android/2.jpg)
+![Android](assets/android/3.jpg)
+![Android](assets/android/4.jpg)
+![Android](assets/android/5.jpg)
+![Android](assets/android/6.jpg)
 
-![Launches Screen](assets/1.png)
-
-### 2. Launch Details
-
-![Launch Details](assets/2.png)
-
-### 3. Interactive Map
-
-![Map Screen](assets/3.png)
-
-### 4. Search Functionality
-
-![Search Feature](assets/4.png)
-
-### 5. Launchpad Information
-
-![Launchpad Details](assets/5.png)
+![iOS](assets/ios/1.jpg)
+![iOS](assets/ios/2.jpg)
+![iOS](assets/ios/3.jpg)
+![iOS](assets/ios/4.jpg)
+![iOS](assets/ios/5.jpg)
+![iOS](assets/ios/6.jpg)
+![iOS](assets/ios/7.jpg)
 
 ## 🏗️ Project Structure
 
