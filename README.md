@@ -147,7 +147,7 @@ src/
 ### Installation
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/its221b/spacex-launch-explorer.git
 cd spacex-launch-explorer
 npm install
 npm start
